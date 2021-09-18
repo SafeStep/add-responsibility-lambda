@@ -14,7 +14,15 @@ npm install
 ### Locally
 This lambda function does require the [emergency-contact-store](www.google.com) DynamoDB table. A local mock version can be found at this [Repo](https://github.com/SafeStep/mock-emergency-contact-responsibility-store).
 
-Ensure the emergency-contact-store table is active / container is running
+Ensure the emergency-contact-store table is active / container is running and that you have typescript compiler installed on your machine. 
+
+Typescript can be installed using `npm install -g typescript`
+
+#### Compile the project
+```
+tsc -b
+```
+#### Run the project
 ```
 npm run start
 ```
