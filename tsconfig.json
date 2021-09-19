@@ -9,7 +9,8 @@
         "rootDir": "src",
         "outDir": "dist",
         "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+        "experimentalDecorators": true,
+        "resolveJsonModule": true
     },
     "lib": [
         "es2015"
