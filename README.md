@@ -10,6 +10,8 @@ Install dependenies
 npm install
 ```
 
+`NODE_ENV` will need to be set to `local` or `production`
+
 ## Launching
 ### Locally
 This lambda function does require the [emergency-contact-store](www.google.com) DynamoDB table. A local mock version can be found at this [Repo](https://github.com/SafeStep/mock-emergency-contact-responsibility-store).
