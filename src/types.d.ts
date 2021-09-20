@@ -1,11 +1,10 @@
-interface InputValidationRules {
+interface InputValidationRule {
     name: String,
     required: boolean,
     min_length?: number,
     max_length?: number,
     regex?: string
 }
-
 interface InputValidationResult {
     passed: boolean,
     errors: string[]

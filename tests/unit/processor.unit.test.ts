@@ -1,9 +1,8 @@
 jest.mock("../../src/table-interactor")
 import TableInteractor from "../../src/table-interactor"; 
-import Validator from "../../src/validator";
+import Validator from "../../src/validator/validator";
 import Processor from "../../src/processor";
 import { SQSRecord, SQSEvent } from "aws-lambda";
-import { when } from 'jest-when'
 
 describe("", () => {
     const TableInteractorMock = <jest.Mock<TableInteractor>>TableInteractor
@@ -21,9 +20,8 @@ describe("", () => {
 
     test("Create pending user when phone is not found in database", () => {
         // given
-        mockValidator.validate = () => {return {passed: true, individualResults: new Map()}};
-        //when(mockValidator.validate).calledWith(new Map<String, String>(), [{name: "123", required: false}]).mockReturnValue({passed: true, individualResults: new Map()});
-        when(mockTableInteractor.userAlreadyExists).calledWith(expect.any(String)).mockReturnValue(false);
+        mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
+        mockTableInteractor.userAlreadyExists = jest.fn().mockReturnValue(false);
 
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
@@ -38,14 +36,41 @@ describe("", () => {
         sut.process(fakeSqsEvent);
         
         // then
-        expect(mockTableInteractor.userAlreadyExists).toHaveBeenCalledWith("12345678910")
         expect(mockValidator.validate).toHaveBeenCalledWith(new Map(Object.entries({
-            mobile: "123456789",
+            mobile: "12345678910",
             f_name: "John",
             email: "john.smith@gmail.com",
             greenId: "12345678-1234-1234-1234-123456789123"
         })));
+        expect(mockTableInteractor.userAlreadyExists).toHaveBeenCalledWith("12345678910")
     });
+
+    test("Exception is thrown if inputs are invalid", () => {
+        // given
+        mockValidator.validate = jest.fn().mockReturnValue({passed: false, individualResults: new Map()})
+        mockTableInteractor.userAlreadyExists = jest.fn().mockReturnValue(false);
+
+        const fakeSqsEvent: SQSEvent = {
+            Records: [getMockSqsRecord(`{
+                "mobile": "12345678910",
+                "f_name": "John",
+                "email": "john.smith@gmail.com",
+                "greenId": "12345678-1234-1234-1234-123456789123"
+            }`)]
+        }
+        
+        // when
+        expect(() => {
+            sut.process(fakeSqsEvent)}).toThrowError("Inputs did not pass validation");
+        
+        // then
+        expect(mockValidator.validate).toHaveBeenCalledWith(new Map(Object.entries({
+            mobile: "12345678910",
+            f_name: "John",
+            email: "john.smith@gmail.com",
+            greenId: "12345678-1234-1234-1234-123456789123"
+        })));
+    })
 
 })
 

@@ -16,8 +16,6 @@ const initialiseInjections = async () => {
     }
 }
 
-initialiseInjections();
-
 export const handler = async (event: SQSEvent) => {
     await initialiseInjections();
     const processor = Container.get(Processor);

@@ -1,13 +1,16 @@
 import { Service } from "typedi";
+import InputValidationRules from "./input-validation-result";
 
 @Service()
 export default class Validator {
     
-    constructor(){};
+    constructor(
+        private rules: InputValidationRules
+    ){};
 
-    public validate(inputs: Map<String, String>, rules: InputValidationRules[]): ValidationResult {
+    public validate(inputs: Map<String, String>): ValidationResult {
         let individualResults: Map<String, InputValidationResult> = new Map(); 
-        rules.forEach(inputRules => {
+        this.rules.getRules().forEach(inputRules => {
             let errors = [] as string[];
 
             const actualInput = inputs.get(inputRules.name);
