@@ -1,10 +1,9 @@
-jest.mock("../../src/table-interactor")
 import TableInteractor from "../../src/table-interactor"; 
 import Validator from "../../src/validator/validator";
 import Processor from "../../src/processor";
 import { SQSRecord, SQSEvent } from "aws-lambda";
 
-describe("", () => {
+describe("Processor class tests", () => {
     const TableInteractorMock = <jest.Mock<TableInteractor>>TableInteractor
     const ValidatorMock = <jest.Mock<Validator>>Validator;
 

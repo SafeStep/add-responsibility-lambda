@@ -2,7 +2,7 @@
 import InputValidationRules from "../../../src/validator/input-validation-result";
 import Validator from "../../../src/validator/validator";
 
-describe("", () => {
+describe("Validator class tests", () => {
     const InputValidationRulesMock = <jest.Mock<InputValidationRules>>InputValidationRules
     let mockInputValidationRules: InputValidationRules;
     beforeEach(() => {
