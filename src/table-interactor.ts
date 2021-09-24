@@ -1,13 +1,18 @@
+import 'reflect-metadata';
 import { Inject, Service } from "typedi";
-import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { DocumentClient, QueryInput } from "aws-sdk/clients/dynamodb";
 import * as AWS from "aws-sdk";
 
 @Service()
 export default class TableInteractor {
     @Inject("aws_region")
-    awsRegion!: string
+    private readonly awsRegion!: string
     @Inject("db_endpoint")
-    endpoint: string | undefined
+    private readonly endpoint: string | undefined
+    @Inject("ec_table_name")
+    private readonly ecStoreName!: string
+    @Inject("ec_mobile_index")
+    private readonly ecMobileIndexName!: string
     
     constructor(
       private docClient: DocumentClient
@@ -17,12 +22,20 @@ export default class TableInteractor {
         });
       }
     
-    public async userAlreadyExists(mobile: String): Promise<boolean> {
-      const result = await this.docClient.get({
-        TableName: "",
-        Key: {}
-      })
-      throw "Not Implimented" 
-      return false;
+    public async userAlreadyExists(mobile: string): Promise<boolean> {
+      const params: QueryInput = {
+        TableName: this.ecStoreName,
+        IndexName: this.ecMobileIndexName,
+        KeyConditionExpression: "mobile = :m",
+        ExpressionAttributeValues: {
+          ":m": {
+            S: mobile
+          }
+        }
+      }
+
+      const result = await this.docClient.query(params).promise()
+
+      return result.Items!.length > 0;
     }
 }

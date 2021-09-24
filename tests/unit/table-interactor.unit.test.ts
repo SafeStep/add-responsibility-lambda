@@ -1,46 +1,103 @@
-import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { AWSError, Request } from "aws-sdk";
+import 'reflect-metadata';
+import { DocumentClient, QueryInput } from "aws-sdk/clients/dynamodb";
 import TableInteractor from "../../src/table-interactor";
+import Container from "typedi";
 
 describe("Table Interactor class tests", () => {
     let sut: TableInteractor;  // subject under test
 
+    const EC_TABLE_NAME = "example_table_name";
+    const EC_TABLE_MOBILE_INDEX = "example_mobile_index";
+
+    var mockDocumentClient = new DocumentClient();
+
+    beforeAll(() => {
+        Container.set("aws_region", "");
+        Container.set("db_endpoint", "");
+        Container.set("ec_table_name", EC_TABLE_NAME);
+        Container.set("ec_mobile_index", EC_TABLE_MOBILE_INDEX);
+
+        Container.set(DocumentClient, mockDocumentClient);
+    });
+
+    afterAll(() => {
+        Container.remove("aws_region");
+        Container.remove("db_endpoint");
+        Container.remove("ec_table_name");
+        Container.remove("ec_mobile_index");
+    })
+
     describe("User exists method tests", () => {
-        test("Create pending user when phone is not found in database", () => {
+        it("should return true user already exists in ec store", async () => {
             // given
+            //@ts-ignore ignore this because it will not perfectly match the object
+            mockDocumentClient.query = jest.fn(() => {
+                return {
+                    promise: () => {
+                        return new Promise((resolve, reject) => {
+                            //@ts-ignore ignore this because it will not perfectly match the object
+                            resolve({
+                                Items: []
+                            })
+                        });
+                    }
+                }
+            });
 
-            // jest.mock('aws-sdk/clients/dynamodb', () => {
-            //     // Works and lets you check for constructor calls:
-            //     return {
-            //       DocumentClient: jest.fn().mockImplementation(() => {
-            //         return {get: () => {return {
-            //             promise: () => {console.log("hello world")}
-            //         }}};
-            //       }),
-            //     };
-            // });
+            sut = Container.get(TableInteractor);
 
-            let mockDocumentClient = new DocumentClient();
-            //@ts-ignore
-            mockDocumentClient.get = () => {return new Promise((resolve, reject) => {
-                //@ts-ignore
-                resolve({
-                    Item: undefined
-                })
-            })}
-
-            sut = new TableInteractor(mockDocumentClient);
-
-            // mockDocumentClient.get = jest.fn().mockReturnValue(mockRequest);
-            // mockRequest.promise = jest.fn().mockReturnValue(new Promise((resolve, reject) => {  // throw an exception
-            //     resolve({Item: {
-            //          email: "user-exists"
-            //     }})
-            // }));
             // when
-    
-            sut.userAlreadyExists("12345678910");
+            const result = await sut.userAlreadyExists("12345678910");
             // then
+            const expectedParams: QueryInput = {
+                TableName: "example_table_name",
+                IndexName: "example_mobile_index",
+                KeyConditionExpression: "mobile = :m",
+                ExpressionAttributeValues: {
+                  ":m": {
+                    S: "12345678910"
+                  }
+                }
+              }
+            expect(mockDocumentClient.query).toHaveBeenCalledWith(expectedParams);
+            expect(result).toBe(false);
+        });
+
+        it("should return false mobile is not found in ec store", async () => {
+            // given
+            //@ts-ignore ignore this because it will not perfectly match the object
+            mockDocumentClient.query = jest.fn(() => {
+                return {
+                    promise: () => {
+                        return new Promise((resolve, reject) => {
+                            //@ts-ignore ignore this because it will not perfectly match the object
+                            resolve({
+                                Items: [{
+                                    mobile: "12345678910"
+                                }]
+                            })
+                        });
+                    }
+                }
+            });
+
+            sut = Container.get(TableInteractor);
+
+            // when
+            const result = await sut.userAlreadyExists("12345678910");
+            // then
+            const expectedParams: QueryInput = {
+                TableName: "example_table_name",
+                IndexName: "example_mobile_index",
+                KeyConditionExpression: "mobile = :m",
+                ExpressionAttributeValues: {
+                  ":m": {
+                    S: "12345678910"
+                  }
+                }
+              }
+            expect(mockDocumentClient.query).toHaveBeenCalledWith(expectedParams);
+            expect(result).toBe(true);
         });
     })
 });
