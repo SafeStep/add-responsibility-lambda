@@ -107,6 +107,24 @@ describe("Validator class tests", () => {
         // given 
         const rules = [{
            name: "wibble",
+           required: true,
+        }]
+        mockInputValidationRules.getRules = jest.fn().mockReturnValue(rules);
+        const sut = new Validator(mockInputValidationRules);
+        const inputMap = new Map<String, String>();
+
+        // when
+        const result = sut.validate(inputMap);
+
+        // then
+        expect(result.passed).toBe(false);
+        expect(result.individualResults.get("wibble")!.errors).toContain("is required but not provided");
+    });
+
+    test("Value is not defined on non required input", () => {
+        // given 
+        const rules = [{
+           name: "wibble",
            required: false,
         }]
         mockInputValidationRules.getRules = jest.fn().mockReturnValue(rules);
