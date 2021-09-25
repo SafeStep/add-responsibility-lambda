@@ -8,7 +8,6 @@
         },
         {
             "name": "mobile",
-            "max_length": 10,
             "required": true
         },
         {

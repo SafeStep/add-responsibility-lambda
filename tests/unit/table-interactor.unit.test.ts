@@ -2,13 +2,11 @@ import 'reflect-metadata';
 import { DocumentClient, QueryInput } from "aws-sdk/clients/dynamodb";
 import TableInteractor from "../../src/table-interactor";
 import Container from "typedi";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 
 jest.mock('uuid', () => {
     return {
         v4: jest.fn()
-        .mockReturnValueOnce("3edea470-3fd7-4421-a17a-c0e754faae35")
-        .mockReturnValueOnce("d206391f-cb1c-4dce-87a4-638aba484f00")
     };
 });
 
@@ -56,6 +54,9 @@ describe("Table Interactor class tests", () => {
                 }
             });
 
+            //@ts-ignore
+            v4.mockReturnValueOnce("3edea470-3fd7-4421-a17a-c0e754faae35")
+            .mockReturnValueOnce("d206391f-cb1c-4dce-87a4-638aba484f00")
             sut = Container.get(TableInteractor);
 
             // when
@@ -98,6 +99,8 @@ describe("Table Interactor class tests", () => {
                 }
             });
 
+            //@ts-ignore
+            v4.mockReturnValueOnce("6177ac9f-de21-4b9a-9b3a-f5f9e70366fd")            
             sut = Container.get(TableInteractor);
 
             // when
@@ -177,6 +180,44 @@ describe("Table Interactor class tests", () => {
                         },
                         RID: {
                             S: "d206391f-cb1c-4dce-87a4-638aba484f00"
+                        },
+                        greenId: {
+                            S: "12345678-1234-1234-1234-123456789012"
+                        }
+                    }
+                }
+            })
+        })
+
+        it("Should create params for insertion of responsibility on already created user", async () => {
+            // given
+
+            //@ts-ignore
+            mockDocumentClient.put = jest.fn(() => {
+                return {
+                    promise: () => {
+                        return new Promise((resolve, reject) => {
+                            //@ts-ignore ignore this because it will not perfectly match the object
+                            resolve({})
+                        });
+                    }
+                }
+            });
+
+            sut = Container.get(TableInteractor);
+
+            // when
+            await sut.createResponsibility("3edea470-3fd7-4421-a17a-c0e754faae35", "12345678-1234-1234-1234-123456789012");
+
+            // then
+            expect(sut.getInsertionParams()[RESPONSIBILITY_TABLE_NAME]).toContainEqual({
+                PutRequest: {
+                    Item: {
+                        ECID: {
+                            S: "3edea470-3fd7-4421-a17a-c0e754faae35"
+                        },
+                        RID: {
+                            S: "6177ac9f-de21-4b9a-9b3a-f5f9e70366fd"
                         },
                         greenId: {
                             S: "12345678-1234-1234-1234-123456789012"
