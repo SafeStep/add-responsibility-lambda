@@ -2,6 +2,7 @@ import TableInteractor from "../../src/table-interactor";
 import Validator from "../../src/validator/validator";
 import Processor from "../../src/processor";
 import { SQSRecord, SQSEvent } from "aws-lambda";
+import Container from "typedi";
 
 describe("Processor class tests", () => {
     const TableInteractorMock = <jest.Mock<TableInteractor>>TableInteractor
@@ -52,6 +53,7 @@ describe("Processor class tests", () => {
             f_name: "John",
             email: "john.smith@gmail.com",
         }, "12345678-1234-1234-1234-123456789123");
+        
     });
 
     test("Exception is thrown if inputs are invalid", async () => {

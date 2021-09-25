@@ -32,5 +32,6 @@ export default class Processor {
                 this.tableInteractor.createUserWithResponsibility(EC, greenId);
             }
         };
+        this.tableInteractor.executeInsertions();  // add the contents to the dynamodb in one batch run
     }
 }

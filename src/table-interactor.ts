@@ -1,7 +1,8 @@
 import 'reflect-metadata';
-import { Inject, Service } from "typedi";
-import { DocumentClient, QueryInput } from "aws-sdk/clients/dynamodb";
+import Container, { Inject, Service } from "typedi";
+import { BatchWriteItemRequestMap, DocumentClient, QueryInput } from "aws-sdk/clients/dynamodb";
 import * as AWS from "aws-sdk";
+import { v4 as uuidv4 } from 'uuid';
 
 @Service()
 export default class TableInteractor {
@@ -13,13 +14,22 @@ export default class TableInteractor {
     private readonly ecStoreName!: string
     @Inject("ec_mobile_index")
     private readonly ecMobileIndexName!: string
+    @Inject("responsibility_table_name")
+    private readonly responsibilityStoreName!: string
+
+    private insertionParams: BatchWriteItemRequestMap
     
     constructor(
-      private docClient: DocumentClient
+      private docClient: DocumentClient,
+      @Inject("ec_table_name") ecStoreName: string,
+      @Inject("responsibility_table_name") responsibilityStoreName: string
       ) {
         AWS.config.update({
           region: this.awsRegion
         });
+        this.insertionParams = {};
+        this.insertionParams[ecStoreName] = []
+        this.insertionParams[responsibilityStoreName] = []
       }
     
     public async userAlreadyExists(user: User): Promise<boolean> {
@@ -39,15 +49,60 @@ export default class TableInteractor {
       return result.Items!.length > 0;
     }
 
-    private async createUser(user: User) {
-      throw new Error("Method not implemented.");
+    private async createEC(user: User): Promise<string> {
+      const ECID = uuidv4();
+      this.insertionParams[this.ecStoreName].push ({
+        PutRequest: {
+          Item: {
+            ECID: {
+              S: ECID
+            },
+            f_name: {
+              S: user.f_name
+            },
+            mobile: {
+              S: user.mobile
+            },
+            email: {
+              S: user.email
+            }
+          }
+        }
+      })
+      return ECID;
     }
     
     async createUserWithResponsibility(user: User, greenUserId: string ) {
-      throw new Error("Method not implemented.");
+      const ECID = await this.createEC(user);
+      this.createResponsibility(ECID, greenUserId);
     }
 
-    async createResponsibility(user: User, greenUserId: string) {
-      throw new Error("Method not implemented.");
+    async createResponsibility(ECID: string, greenUserId: string) {
+      const RID = uuidv4();
+      this.insertionParams[this.responsibilityStoreName].push ({
+        PutRequest: {
+          Item: {
+            ECID: {
+              S: ECID
+            },
+            RID: {
+              S: RID
+            },
+            greenId: {
+              S: greenUserId
+            }
+          }
+        }
+      })
+    }
+
+    async executeInsertions() {
+      this.docClient.batchWrite({
+        RequestItems: this.insertionParams
+      });
+    }
+
+    getInsertionParams(): BatchWriteItemRequestMap {
+      return this.insertionParams;
     }
 }
