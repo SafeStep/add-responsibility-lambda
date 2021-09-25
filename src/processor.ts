@@ -10,17 +10,27 @@ export default class Processor {
         private validator: Validator
     ) {}
 
-    process(event: SQSEvent) {
-        event.Records.forEach(record => {  // for each value from the queue
-            const jsonBody = JSON.parse(record.body);
+    async process(event: SQSEvent) {
+        for (const record of event.Records) {
+            let jsonBody = JSON.parse(record.body);
             const validInputs = this.validator.validate(new Map(Object.entries(jsonBody)))
 
             if (!validInputs.passed) {
                 console.error([...validInputs.individualResults].filter(([k,v]) => {return !v.passed}));  // output all the values that failed
-                throw "Inputs did not pass validation"
+                throw new Error("Inputs did not pass validation")
             }
 
-            const userAlreadyExists = this.tableInteractor.userAlreadyExists(jsonBody.mobile);
-        });
+            const greenId = jsonBody.greenId;
+            delete jsonBody.greenId;  // remove the greenId from the jsonbody
+            const EC: User = jsonBody;
+
+            const userAlreadyExists = await this.tableInteractor.userAlreadyExists(jsonBody);
+            if (userAlreadyExists) {
+                throw new Error("Not implemented")
+            }
+            else {
+                this.tableInteractor.createUserWithResponsibility(EC, greenId);
+            }
+        };
     }
 }

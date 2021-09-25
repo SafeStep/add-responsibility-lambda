@@ -22,14 +22,14 @@ export default class TableInteractor {
         });
       }
     
-    public async userAlreadyExists(mobile: string): Promise<boolean> {
+    public async userAlreadyExists(user: User): Promise<boolean> {
       const params: QueryInput = {
         TableName: this.ecStoreName,
         IndexName: this.ecMobileIndexName,
         KeyConditionExpression: "mobile = :m",
         ExpressionAttributeValues: {
           ":m": {
-            S: mobile
+            S: user.mobile
           }
         }
       }
@@ -37,5 +37,17 @@ export default class TableInteractor {
       const result = await this.docClient.query(params).promise()
 
       return result.Items!.length > 0;
+    }
+
+    private async createUser(user: User) {
+      throw new Error("Method not implemented.");
+    }
+    
+    async createUserWithResponsibility(user: User, greenUserId: string ) {
+      throw new Error("Method not implemented.");
+    }
+
+    async createResponsibility(user: User, greenUserId: string) {
+      throw new Error("Method not implemented.");
     }
 }

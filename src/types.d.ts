@@ -1,5 +1,5 @@
 interface InputValidationRule {
-    name: String,
+    name: string,
     required: boolean,
     min_length?: number,
     max_length?: number,
@@ -13,4 +13,10 @@ interface InputValidationResult {
 interface ValidationResult {
     passed: boolean,
     individualResults: Map<String, InputValidationResult>
+}
+
+interface User {
+    mobile: string,
+    f_name: string,
+    email: string,
 }

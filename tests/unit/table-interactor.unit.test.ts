@@ -47,7 +47,11 @@ describe("Table Interactor class tests", () => {
             sut = Container.get(TableInteractor);
 
             // when
-            const result = await sut.userAlreadyExists("12345678910");
+            const result = await sut.userAlreadyExists({
+                f_name: "bruh",
+                email: "someones_email",
+                mobile: "12345678910"
+            });
             // then
             const expectedParams: QueryInput = {
                 TableName: "example_table_name",
@@ -84,7 +88,11 @@ describe("Table Interactor class tests", () => {
             sut = Container.get(TableInteractor);
 
             // when
-            const result = await sut.userAlreadyExists("12345678910");
+            const result = await sut.userAlreadyExists({
+                f_name: "bruh",
+                email: "someones_email",
+                mobile: "12345678910"
+            });
             // then
             const expectedParams: QueryInput = {
                 TableName: "example_table_name",

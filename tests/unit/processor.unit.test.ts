@@ -17,10 +17,11 @@ describe("Processor class tests", () => {
         sut = new Processor(mockTableInteractor, mockValidator);
     })
 
-    test("Create pending user when phone is not found in database", () => {
+    test("Create pending user when phone is not found in database", async () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
         mockTableInteractor.userAlreadyExists = jest.fn().mockReturnValue(false);
+        mockTableInteractor.createUserWithResponsibility = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
@@ -32,7 +33,7 @@ describe("Processor class tests", () => {
         }
         
         // when
-        sut.process(fakeSqsEvent);
+        await sut.process(fakeSqsEvent);
         
         // then
         expect(mockValidator.validate).toHaveBeenCalledWith(new Map(Object.entries({
@@ -41,13 +42,22 @@ describe("Processor class tests", () => {
             email: "john.smith@gmail.com",
             greenId: "12345678-1234-1234-1234-123456789123"
         })));
-        expect(mockTableInteractor.userAlreadyExists).toHaveBeenCalledWith("12345678910")
+        expect(mockTableInteractor.userAlreadyExists).toHaveBeenCalledWith({
+            mobile: "12345678910",
+            f_name: "John",
+            email: "john.smith@gmail.com",
+        })
+        expect(mockTableInteractor.createUserWithResponsibility).toHaveBeenCalledWith({
+            mobile: "12345678910",
+            f_name: "John",
+            email: "john.smith@gmail.com",
+        }, "12345678-1234-1234-1234-123456789123");
     });
 
-    test("Exception is thrown if inputs are invalid", () => {
+    test("Exception is thrown if inputs are invalid", async () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: false, individualResults: new Map()})
-        mockTableInteractor.userAlreadyExists = jest.fn().mockReturnValue(false);
+        mockTableInteractor.userAlreadyExists = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
@@ -59,8 +69,7 @@ describe("Processor class tests", () => {
         }
         
         // when
-        expect(() => {
-            sut.process(fakeSqsEvent)}).toThrowError("Inputs did not pass validation");
+        await expect(sut.process(fakeSqsEvent)).rejects.toThrow("Inputs did not pass validation")
         
         // then
         expect(mockValidator.validate).toHaveBeenCalledWith(new Map(Object.entries({
@@ -69,6 +78,7 @@ describe("Processor class tests", () => {
             email: "john.smith@gmail.com",
             greenId: "12345678-1234-1234-1234-123456789123"
         })));
+        expect(mockTableInteractor.userAlreadyExists).toBeCalledTimes(0)
     })
 
 })
