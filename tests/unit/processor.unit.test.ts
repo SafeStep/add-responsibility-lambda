@@ -27,6 +27,7 @@ describe("Processor class tests", () => {
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
                 "mobile": "12345678910",
+                "dialing_code": 1,
                 "f_name": "John",
                 "email": "john.smith@gmail.com",
                 "greenId": "12345678-1234-1234-1234-123456789123"
@@ -39,17 +40,20 @@ describe("Processor class tests", () => {
         // then
         expect(mockValidator.validate).toHaveBeenCalledWith(new Map(Object.entries({
             mobile: "12345678910",
+            dialing_code: 1,
             f_name: "John",
             email: "john.smith@gmail.com",
             greenId: "12345678-1234-1234-1234-123456789123"
         })));
         expect(mockTableInteractor.userAlreadyExists).toHaveBeenCalledWith({
             mobile: "12345678910",
+            dialing_code: 1,
             f_name: "John",
             email: "john.smith@gmail.com",
         })
         expect(mockTableInteractor.createUserWithResponsibility).toHaveBeenCalledWith({
             mobile: "12345678910",
+            dialing_code: 1,
             f_name: "John",
             email: "john.smith@gmail.com",
         }, "12345678-1234-1234-1234-123456789123");

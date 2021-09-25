@@ -62,7 +62,8 @@ describe("Table Interactor class tests", () => {
             const result = await sut.userAlreadyExists({
                 f_name: "bruh",
                 email: "someones_email",
-                mobile: "12345678910"
+                mobile: "12345678910",
+                dialing_code: "44"
             });
             // then
             const expectedParams: QueryInput = {
@@ -103,7 +104,8 @@ describe("Table Interactor class tests", () => {
             const result = await sut.userAlreadyExists({
                 f_name: "bruh",
                 email: "someones_email",
-                mobile: "12345678910"
+                mobile: "12345678910",
+                dialing_code: "44"
             });
             // then
             const expectedParams: QueryInput = {
@@ -127,7 +129,8 @@ describe("Table Interactor class tests", () => {
             const fakeUser = {
                 f_name: "John",
                 email: "john.smith@gmail.com",
-                mobile: "12345678910"
+                mobile: "12345678910",
+                dialing_code: "44"
             }
 
             //@ts-ignore
