@@ -47,7 +47,9 @@ describe("Table Interactor class tests", () => {
                         return new Promise((resolve, reject) => {
                             //@ts-ignore ignore this because it will not perfectly match the object
                             resolve({
-                                Items: []
+                                Items: [{
+                                    ECID: "f428015d-4c42-4505-b6ab-e31fdb2691d3"
+                                }]
                             })
                         });
                     }
@@ -60,7 +62,7 @@ describe("Table Interactor class tests", () => {
             sut = Container.get(TableInteractor);
 
             // when
-            const result = await sut.userAlreadyExists({
+            const result = await sut.getEcid({
                 f_name: "bruh",
                 email: "someones_email",
                 mobile: "12345678910",
@@ -78,7 +80,7 @@ describe("Table Interactor class tests", () => {
                 }
               }
             expect(mockDocumentClient.query).toHaveBeenCalledWith(expectedParams);
-            expect(result).toBe(false);
+            expect(result).toBe("f428015d-4c42-4505-b6ab-e31fdb2691d3");
         });
 
         it("should return false mobile is not found in ec store", async () => {
@@ -90,9 +92,7 @@ describe("Table Interactor class tests", () => {
                         return new Promise((resolve, reject) => {
                             //@ts-ignore ignore this because it will not perfectly match the object
                             resolve({
-                                Items: [{
-                                    mobile: "12345678910"
-                                }]
+                                Items: []
                             })
                         });
                     }
@@ -104,7 +104,7 @@ describe("Table Interactor class tests", () => {
             sut = Container.get(TableInteractor);
 
             // when
-            const result = await sut.userAlreadyExists({
+            const result = await sut.getEcid({
                 f_name: "bruh",
                 email: "someones_email",
                 mobile: "12345678910",
@@ -122,7 +122,7 @@ describe("Table Interactor class tests", () => {
                 }
               }
             expect(mockDocumentClient.query).toHaveBeenCalledWith(expectedParams);
-            expect(result).toBe(true);
+            expect(result).toBe("");
         });
     })
 

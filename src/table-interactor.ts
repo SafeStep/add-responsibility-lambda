@@ -32,7 +32,7 @@ export default class TableInteractor {
         this.insertionParams[responsibilityStoreName] = []
       }
     
-    public async userAlreadyExists(user: User): Promise<boolean> {
+    public async getEcid(user: User): Promise<string> {
       const params: QueryInput = {
         TableName: this.ecStoreName,
         IndexName: this.ecMobileIndexName,
@@ -46,7 +46,9 @@ export default class TableInteractor {
 
       const result = await this.docClient.query(params).promise()
 
-      return result.Items!.length > 0;
+      if (result.Items === undefined || result.Items.length === 0) return ""
+
+      return result.Items![0].ECID;
     }
 
     private async createEC(user: User): Promise<string> {

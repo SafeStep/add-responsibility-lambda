@@ -21,7 +21,7 @@ describe("Processor class tests", () => {
     test("Create pending user when phone is not found in database", async () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
-        mockTableInteractor.userAlreadyExists = jest.fn().mockReturnValue(false);
+        mockTableInteractor.getEcid = jest.fn().mockReturnValue("");
         mockTableInteractor.createUserWithResponsibility = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
@@ -45,7 +45,7 @@ describe("Processor class tests", () => {
             email: "john.smith@gmail.com",
             greenId: "12345678-1234-1234-1234-123456789123"
         })));
-        expect(mockTableInteractor.userAlreadyExists).toHaveBeenCalledWith({
+        expect(mockTableInteractor.getEcid).toHaveBeenCalledWith({
             mobile: "12345678910",
             dialing_code: 1,
             f_name: "John",
@@ -63,7 +63,7 @@ describe("Processor class tests", () => {
     test("Exception is thrown if inputs are invalid", async () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: false, individualResults: new Map()})
-        mockTableInteractor.userAlreadyExists = jest.fn();
+        mockTableInteractor.getEcid = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
@@ -84,7 +84,7 @@ describe("Processor class tests", () => {
             email: "john.smith@gmail.com",
             greenId: "12345678-1234-1234-1234-123456789123"
         })));
-        expect(mockTableInteractor.userAlreadyExists).toBeCalledTimes(0)
+        expect(mockTableInteractor.getEcid).toBeCalledTimes(0)
     })
 
 })

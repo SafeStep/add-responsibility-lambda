@@ -24,12 +24,12 @@ export default class Processor {
             delete jsonBody.greenId;  // remove the greenId from the jsonbody
             const EC: User = jsonBody;
 
-            const userAlreadyExists = await this.tableInteractor.userAlreadyExists(jsonBody);
-            if (userAlreadyExists) {
-                throw new Error("Not implemented")
+            const ECID = await this.tableInteractor.getEcid(jsonBody);
+            if (ECID === "") {
+                this.tableInteractor.createUserWithResponsibility(EC, greenId);
             }
             else {
-                this.tableInteractor.createUserWithResponsibility(EC, greenId);
+                throw new Error("Not implemented")
             }
         };
         this.tableInteractor.executeInsertions();  // add the contents to the dynamodb in one batch run
