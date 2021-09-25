@@ -29,7 +29,7 @@ export default class Processor {
                 this.tableInteractor.createUserWithResponsibility(EC, greenId);
             }
             else {
-                throw new Error("Not implemented")
+                this.tableInteractor.createResponsibility(ECID, greenId);
             }
         };
         this.tableInteractor.executeInsertions();  // add the contents to the dynamodb in one batch run
