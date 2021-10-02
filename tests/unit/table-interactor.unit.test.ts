@@ -13,9 +13,9 @@ jest.mock('uuid', () => {
 describe("Table Interactor class tests", () => {
     let sut: TableInteractor;  // subject under test
 
-    const EC_TABLE_NAME = "example_table_name";
+    const EC_TABLE_NAME = "example_ecid_store";
     const EC_TABLE_MOBILE_INDEX = "example_mobile_index";
-    const RESPONSIBILITY_TABLE_NAME = "example_responsiblity_store"
+    const RESPONSIBILITY_TABLE_NAME = "example_responsibility_store"
 
     var mockDocumentClient: DocumentClient;
 
@@ -35,6 +35,13 @@ describe("Table Interactor class tests", () => {
         Container.remove("db_endpoint");
         Container.remove("ec_table_name");
         Container.remove("ec_mobile_index");
+    })
+
+    afterEach(async () => {
+        try {
+            await sut.executeInsertions()  // remove statefulness
+        }
+        catch{};
     })
 
     describe("User exists method tests", () => {
@@ -70,7 +77,7 @@ describe("Table Interactor class tests", () => {
             });
             // then
             const expectedParams: QueryInput = {
-                TableName: "example_table_name",
+                TableName: "example_ecid_store",
                 IndexName: "example_mobile_index",
                 KeyConditionExpression: "mobile = :m",
                 ExpressionAttributeValues: {
@@ -112,7 +119,7 @@ describe("Table Interactor class tests", () => {
             });
             // then
             const expectedParams: QueryInput = {
-                TableName: "example_table_name",
+                TableName: "example_ecid_store",
                 IndexName: "example_mobile_index",
                 KeyConditionExpression: "mobile = :m",
                 ExpressionAttributeValues: {
@@ -151,7 +158,7 @@ describe("Table Interactor class tests", () => {
             sut = Container.get(TableInteractor);
 
             // when
-            await sut.createUserWithResponsibility(fakeUser, "12345678-1234-1234-1234-123456789012");
+            sut.createUserWithResponsibility(fakeUser, "12345678-1234-1234-1234-123456789012");
 
             // then
             expect(sut.getInsertionParams()[EC_TABLE_NAME]).toContainEqual({
@@ -165,6 +172,9 @@ describe("Table Interactor class tests", () => {
                         },
                         mobile: {
                             S: "12345678910"
+                        },
+                        dialing_code: {
+                            S: "44"
                         },
                         ECID:  {
                             S: "3edea470-3fd7-4421-a17a-c0e754faae35"
@@ -207,7 +217,7 @@ describe("Table Interactor class tests", () => {
             sut = Container.get(TableInteractor);
 
             // when
-            await sut.createResponsibility("3edea470-3fd7-4421-a17a-c0e754faae35", "12345678-1234-1234-1234-123456789012");
+            sut.createResponsibility("3edea470-3fd7-4421-a17a-c0e754faae35", "12345678-1234-1234-1234-123456789012");
 
             // then
             expect(sut.getInsertionParams()[RESPONSIBILITY_TABLE_NAME]).toContainEqual({
@@ -227,4 +237,101 @@ describe("Table Interactor class tests", () => {
             })
         })
     })
+
+    describe("Execute insertions method", () => {
+        it("should call execute insertions should be called for each scenario", async () => {
+            // given
+            //@ts-ignore
+            mockDocumentClient.put = jest.fn(() => {
+                return {
+                    promise: () => {
+                        return new Promise((resolve, reject) => {
+                            //@ts-ignore ignore this because it will not perfectly match the object
+                            resolve({})
+                        });
+                    }
+                }
+            });
+
+            mockDocumentClient.batchWrite = jest.fn();
+
+            //@ts-ignore
+            v4.mockReturnValueOnce("random-uuid") // used for RID for first responsibility
+            .mockReturnValueOnce("a-new-uuid")  // used for RID of new user and responsibility
+            .mockReturnValueOnce("another-random-uuid")  // used for ECID of new user
+
+            sut.createResponsibility("123", "something-else")
+            sut.createUserWithResponsibility({
+                f_name: "John",
+                mobile: "12345678910",
+                dialing_code: "44",
+                email: "someones-email@yah.com"
+            }, "some-green-user")
+
+            // when
+            await sut.executeInsertions();
+
+            // then
+            expect(mockDocumentClient.batchWrite).toHaveBeenCalledWith({
+                RequestItems: {
+                    "example_responsibility_store": [
+                        {
+                            "PutRequest": {
+                                "Item": {
+                                    "ECID": {
+                                        "S": "123"
+                                    },
+                                    "RID": {
+                                        "S": "random-uuid"
+                                    },
+                                    "greenId": {
+                                        "S": "something-else"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "PutRequest": {
+                                "Item": {
+                                    "ECID": {
+                                        "S": "a-new-uuid"
+                                    },
+                                    "RID": {
+                                        "S": "another-random-uuid"
+                                    },
+                                    "greenId": {
+                                        "S": "some-green-user"
+                                    }
+                                }
+                            }
+                        },
+                    ],
+                    "example_ecid_store": [
+                        {
+                            "PutRequest": {
+                                "Item": {
+                                    "ECID": {
+                                        "S": "a-new-uuid"
+                                    },
+                                    "email": {
+                                        "S": "someones-email@yah.com"
+                                    },
+                                    "f_name": {
+                                        "S": "John"
+                                    },
+                                    "mobile": {
+                                        "S": "12345678910"
+                                    },
+                                    "dialing_code": {
+                                        "S": "44"
+                                    },
+                                }
+                            }
+                        },
+                    ]
+
+                }
+            })
+        })
+    });
 });

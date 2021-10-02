@@ -51,7 +51,7 @@ export default class TableInteractor {
       return result.Items![0].ECID;
     }
 
-    private async createEC(user: User): Promise<string> {
+    private createEC(user: User): string {
       const ECID = uuidv4();
       this.insertionParams[this.ecStoreName].push ({
         PutRequest: {
@@ -65,6 +65,9 @@ export default class TableInteractor {
             mobile: {
               S: user.mobile
             },
+            dialing_code: {
+              S: user.dialing_code
+            },
             email: {
               S: user.email
             }
@@ -74,12 +77,12 @@ export default class TableInteractor {
       return ECID;
     }
     
-    async createUserWithResponsibility(user: User, greenUserId: string ) {
-      const ECID = await this.createEC(user);
+    createUserWithResponsibility(user: User, greenUserId: string ) {
+      const ECID = this.createEC(user);
       this.createResponsibility(ECID, greenUserId);
     }
 
-    async createResponsibility(ECID: string, greenUserId: string) {
+    createResponsibility(ECID: string, greenUserId: string) {
       const RID = uuidv4();
       this.insertionParams[this.responsibilityStoreName].push ({
         PutRequest: {
@@ -98,10 +101,17 @@ export default class TableInteractor {
       })
     }
 
+    private resetInsertionParams() {
+      this.insertionParams = {};
+      this.insertionParams[this.ecStoreName] = []
+      this.insertionParams[this.responsibilityStoreName] = []
+    }
+
     async executeInsertions() {
-      this.docClient.batchWrite({
+      await this.docClient.batchWrite({
         RequestItems: this.insertionParams
       });
+      this.resetInsertionParams()  // reset the insertion params
     }
 
     getInsertionParams(): BatchWriteItemRequestMap {
