@@ -193,6 +193,9 @@ describe("Table Interactor class tests", () => {
                         },
                         greenId: {
                             S: "12345678-1234-1234-1234-123456789012"
+                        },
+                        status: {
+                            S: "pending"
                         }
                     }
                 }
@@ -231,6 +234,9 @@ describe("Table Interactor class tests", () => {
                         },
                         greenId: {
                             S: "12345678-1234-1234-1234-123456789012"
+                        },
+                        status: {
+                            S: "pending"
                         }
                     }
                 }
@@ -286,6 +292,9 @@ describe("Table Interactor class tests", () => {
                                     },
                                     "greenId": {
                                         "S": "something-else"
+                                    },
+                                    "status": {
+                                        "S": "pending"
                                     }
                                 }
                             }
@@ -301,6 +310,9 @@ describe("Table Interactor class tests", () => {
                                     },
                                     "greenId": {
                                         "S": "some-green-user"
+                                    },
+                                    "status": {
+                                        "S": "pending"
                                     }
                                 }
                             }

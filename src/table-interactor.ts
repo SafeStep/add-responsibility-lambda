@@ -95,6 +95,9 @@ export default class TableInteractor {
             },
             greenId: {
               S: greenUserId
+            },
+            status: {
+              S: "pending"
             }
           }
         }
