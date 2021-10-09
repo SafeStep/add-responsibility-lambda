@@ -3,6 +3,7 @@ import Container, { Inject, Service } from "typedi";
 import { BatchWriteItemRequestMap, DocumentClient, QueryInput } from "aws-sdk/clients/dynamodb";
 import * as AWS from "aws-sdk";
 import { v4 as uuidv4 } from 'uuid';
+import base64url from "base64url";
 
 @Service()
 export default class TableInteractor {
@@ -83,7 +84,7 @@ export default class TableInteractor {
     }
 
     createResponsibility(ECID: string, greenUserId: string) {
-      const RID = uuidv4();
+      const RID = base64url(uuidv4());
       this.insertionParams[this.responsibilityStoreName].push ({
         PutRequest: {
           Item: {

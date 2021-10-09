@@ -189,7 +189,7 @@ describe("Table Interactor class tests", () => {
                             S: "3edea470-3fd7-4421-a17a-c0e754faae35"
                         },
                         RID: {
-                            S: "d206391f-cb1c-4dce-87a4-638aba484f00"
+                            S: "ZDIwNjM5MWYtY2IxYy00ZGNlLTg3YTQtNjM4YWJhNDg0ZjAw"
                         },
                         greenId: {
                             S: "12345678-1234-1234-1234-123456789012"
@@ -230,7 +230,7 @@ describe("Table Interactor class tests", () => {
                             S: "3edea470-3fd7-4421-a17a-c0e754faae35"
                         },
                         RID: {
-                            S: "6177ac9f-de21-4b9a-9b3a-f5f9e70366fd"
+                            S: "NjE3N2FjOWYtZGUyMS00YjlhLTliM2EtZjVmOWU3MDM2NmZk"
                         },
                         greenId: {
                             S: "12345678-1234-1234-1234-123456789012"
@@ -262,9 +262,9 @@ describe("Table Interactor class tests", () => {
             mockDocumentClient.batchWrite = jest.fn();
 
             //@ts-ignore
-            v4.mockReturnValueOnce("random-uuid") // used for RID for first responsibility
-            .mockReturnValueOnce("a-new-uuid")  // used for RID of new user and responsibility
-            .mockReturnValueOnce("another-random-uuid")  // used for ECID of new user
+            v4.mockReturnValueOnce("d1f05698-fbef-4fc8-954a-1dc505eace42") // used for RID for first responsibility
+            .mockReturnValueOnce("11588249-465f-4ccf-8803-bd4d7d3da576")  // used for RID of new user and responsibility
+            .mockReturnValueOnce("9aba95f5-5e8a-47ca-95b9-307237203599")  // used for ECID of new user
 
             sut.createResponsibility("123", "something-else")
             sut.createUserWithResponsibility({
@@ -288,7 +288,7 @@ describe("Table Interactor class tests", () => {
                                         "S": "123"
                                     },
                                     "RID": {
-                                        "S": "random-uuid"
+                                        "S": "ZDFmMDU2OTgtZmJlZi00ZmM4LTk1NGEtMWRjNTA1ZWFjZTQy"
                                     },
                                     "greenId": {
                                         "S": "something-else"
@@ -303,10 +303,10 @@ describe("Table Interactor class tests", () => {
                             "PutRequest": {
                                 "Item": {
                                     "ECID": {
-                                        "S": "a-new-uuid"
+                                        "S": "11588249-465f-4ccf-8803-bd4d7d3da576"
                                     },
                                     "RID": {
-                                        "S": "another-random-uuid"
+                                        "S": "OWFiYTk1ZjUtNWU4YS00N2NhLTk1YjktMzA3MjM3MjAzNTk5"
                                     },
                                     "greenId": {
                                         "S": "some-green-user"
@@ -323,7 +323,7 @@ describe("Table Interactor class tests", () => {
                             "PutRequest": {
                                 "Item": {
                                     "ECID": {
-                                        "S": "a-new-uuid"
+                                        "S": "11588249-465f-4ccf-8803-bd4d7d3da576"
                                     },
                                     "email": {
                                         "S": "someones-email@yah.com"

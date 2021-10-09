@@ -29,6 +29,7 @@
     },
     "dependencies": {
         "aws-sdk": "^2.991.0",
+        "base64url": "^3.0.1",
         "dotenv": "^10.0.0",
         "reflect-metadata": "^0.1.13",
         "typedi": "^0.10.0",
