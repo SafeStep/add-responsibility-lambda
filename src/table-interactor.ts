@@ -9,19 +9,18 @@ import base64url from "base64url";
 export default class TableInteractor {
     @Inject("aws_region")
     private readonly awsRegion!: string
-    @Inject("db_endpoint")
-    private readonly endpoint: string | undefined
     @Inject("ec_table_name")
     private readonly ecStoreName!: string
     @Inject("ec_mobile_index")
     private readonly ecMobileIndexName!: string
     @Inject("responsibility_table_name")
     private readonly responsibilityStoreName!: string
+    @Inject()
+    private docClient!: DocumentClient
 
     private insertionParams: BatchWriteItemRequestMap
     
     constructor(
-      private docClient: DocumentClient,
       @Inject("ec_table_name") ecStoreName: string,
       @Inject("responsibility_table_name") responsibilityStoreName: string
       ) {

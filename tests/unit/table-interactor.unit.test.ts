@@ -39,7 +39,7 @@ describe("Table Interactor class tests", () => {
 
     afterEach(async () => {
         try {
-            await sut.executeInsertions()  // remove statefulness
+            await sut.executeInsertions()  // clear state
         }
         catch{};
     })

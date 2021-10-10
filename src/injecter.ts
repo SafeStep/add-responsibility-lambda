@@ -1,3 +1,4 @@
+import { SES } from "aws-sdk";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import Container from "typedi";
 
@@ -15,5 +16,6 @@ export default abstract class Injector {
         }
 
         Container.set(DocumentClient, new DocumentClient());
+        Container.set(SES, new SES());
     }
 }

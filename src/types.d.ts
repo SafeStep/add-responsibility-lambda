@@ -21,3 +21,9 @@ interface User {
     f_name: string,
     email: string,
 }
+
+interface Responsibility {
+    ECID: string,
+    RID: string,
+    greenId: string
+}
