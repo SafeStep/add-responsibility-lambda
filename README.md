@@ -31,3 +31,27 @@ npm run start
 
 ### Prod
 The root directory must be compiled into a .zip, then stored in the S3 bucket called `safe-step-lambda-functions-source` with a key of `add-responsibility.zip`. Then running the `add-responsibility-stack` will deploy the new lambda.
+
+## Example Input
+The input to the lambda is a SQS, which should have elements of the following structure:
+```
+{
+    "mobile": "12345678910",
+    "dialing_code": 1,
+    "f_name": "John",
+    "email": "john.smith@gmail.com",
+    "greenId": "12345678-1234-1234-1234-123456789123"
+}
+```
+
+OR
+
+```
+{
+    "f_name": "John",
+    "email": "john.smith@gmail.com",
+    "greenId": "12345678-1234-1234-1234-123456789123"
+}
+```
+
+As mobile number is optional when a green user creates a new emergency contact

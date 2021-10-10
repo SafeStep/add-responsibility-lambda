@@ -20,15 +20,19 @@
                                 "Resource":"arn:aws:logs:*:*:*"
                             },  {
                                 "Effect":"Allow", 
-                                "Action":["dynamodb:Query"], 
+                                "Action":["dynamodb:Query", "dynamodb:BatchWriteItem"], 
                                 "Resource":"arn:aws:dynamodb:eu-west-1:209523969378:responsibility-store"
                             },  {
                                 "Effect":"Allow", 
-                                "Action":["dynamodb:GetItem", "dynamodb:Query"], 
+                                "Action":["dynamodb:GetItem", "dynamodb:Query", "dynamodb:BatchWriteItem"], 
                                 "Resource":"arn:aws:dynamodb:eu-west-1:209523969378:emergency-contact-store"
                             },  {
                                 "Effect":"Allow", 
                                 "Action":["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"], 
+                                "Resource": {"Fn::GetAtt":["AddResponsibilityQueue", "Arn"]}
+                            },  {
+                                "Effect":"Allow", 
+                                "Action":["sqs:SendMessage"], 
                                 "Resource": {"Fn::GetAtt":["AddResponsibilityQueue", "Arn"]}
                             }
                         ]
@@ -41,6 +45,13 @@
             "Properties": {
                 "DelaySeconds": 0,
                 "QueueName": "add-responsibility-queue"
+            }
+        },
+        "AddResponsibilityQueueDLQ": {
+            "Type":"AWS::SQS::Queue", 
+            "Properties": {
+                "DelaySeconds": 0,
+                "QueueName": "add-responsibility-queue-dlq"
             }
         },
         "AddResponsibilityLambda": {
