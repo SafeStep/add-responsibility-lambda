@@ -1,20 +1,25 @@
 import TableInteractor from "../../src/table-interactor"; 
 import Validator from "../../src/validator/validator";
 import Processor from "../../src/processor";
+import EmailSender from "../../src/email-sender";
 import { SQSRecord, SQSEvent } from "aws-lambda";
 import Container from "typedi";
 
 describe("Processor class tests", () => {
-    const TableInteractorMock = <jest.Mock<TableInteractor>>TableInteractor
-    const ValidatorMock = <jest.Mock<Validator>>Validator;
-
     let sut: Processor;  // subject under test
     let mockTableInteractor: TableInteractor;
     let mockValidator: Validator;
+    let mockEmailSender: EmailSender;
+
+    beforeAll(() => {
+        mockTableInteractor = new TableInteractor("ec_store_name", "resp_store_name")
+        mockValidator = Container.get(Validator);
+        mockEmailSender = new EmailSender();
+        mockTableInteractor.executeInsertions = jest.fn();
+    })
 
     beforeEach(() => {
-        mockTableInteractor = new TableInteractorMock()
-        mockValidator = new ValidatorMock();
+        Container.set(EmailSender, mockEmailSender);
         sut = new Processor(mockTableInteractor, mockValidator);
     })
 
@@ -23,6 +28,8 @@ describe("Processor class tests", () => {
         mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
         mockTableInteractor.getEcid = jest.fn().mockReturnValue("");
         mockTableInteractor.createUserWithResponsibility = jest.fn();
+        mockTableInteractor.executeInsertions = jest.fn();
+        mockEmailSender.sendEmail = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
@@ -56,8 +63,7 @@ describe("Processor class tests", () => {
             dialing_code: 1,
             f_name: "John",
             email: "john.smith@gmail.com",
-        }, "12345678-1234-1234-1234-123456789123");
-        
+        }, "12345678-1234-1234-1234-123456789123")
     });
 
     test("Add responsibility to already existing user", async () => {
@@ -65,6 +71,7 @@ describe("Processor class tests", () => {
         mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
         mockTableInteractor.getEcid = jest.fn().mockReturnValue("c2ca44a9-f658-45dc-933c-038d0425a847");
         mockTableInteractor.createResponsibility = jest.fn();
+        mockEmailSender.sendEmail = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
@@ -94,13 +101,14 @@ describe("Processor class tests", () => {
             email: "john.smith@gmail.com",
         })
         expect(mockTableInteractor.createResponsibility).toHaveBeenCalledWith("c2ca44a9-f658-45dc-933c-038d0425a847", "12345678-1234-1234-1234-123456789123");
-        
     });
 
     test("Exception is thrown if inputs are invalid", async () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: false, individualResults: new Map()})
         mockTableInteractor.getEcid = jest.fn();
+        mockTableInteractor.executeInsertions = jest.fn();
+        mockEmailSender.sendEmail = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
@@ -112,7 +120,47 @@ describe("Processor class tests", () => {
         }
         
         // when
-        await expect(sut.process(fakeSqsEvent)).rejects.toThrow("Inputs did not pass validation")
+        const rejectedMessages = await sut.process(fakeSqsEvent)
+        
+        // then
+        expect(rejectedMessages).toHaveLength(1)
+        expect(mockValidator.validate).toHaveBeenCalledWith(new Map(Object.entries({
+            mobile: "12345678910",
+            f_name: "John",
+            email: "john.smith@gmail.com",
+            greenId: "12345678-1234-1234-1234-123456789123"
+        })));
+        expect(mockTableInteractor.getEcid).toHaveBeenCalledTimes(0)
+    })
+
+    test("Insert valid inputs and not invalid ones", async () => {
+        // given
+        mockValidator.validate = jest.fn()
+        .mockReturnValueOnce({passed: false, individualResults: new Map()})
+        .mockReturnValueOnce({passed: true, individualResults: new Map()})
+        mockTableInteractor.getEcid = jest.fn();
+        mockTableInteractor.executeInsertions = jest.fn();
+        mockEmailSender.sendEmail = jest.fn();
+
+        const fakeSqsEvent: SQSEvent = {
+            Records: [
+                getMockSqsRecord(`{
+                    "mobile": "12345678910",
+                    "f_name": "John",
+                    "email": "john.smith@gmail.com",
+                    "greenId": "12345678-1234-1234-1234-123456789123"
+                }`),
+                getMockSqsRecord(`{
+                    "mobile": "10987654321",
+                    "f_name": "Alice",
+                    "email": "alice.smith@gmail.com",
+                    "greenId": "87654321-4321-4321-4321-987654321321"
+                }`),
+            ]
+        }
+        
+        // when
+        const rejectedMessages = await sut.process(fakeSqsEvent)
         
         // then
         expect(mockValidator.validate).toHaveBeenCalledWith(new Map(Object.entries({
@@ -121,9 +169,10 @@ describe("Processor class tests", () => {
             email: "john.smith@gmail.com",
             greenId: "12345678-1234-1234-1234-123456789123"
         })));
-        expect(mockTableInteractor.getEcid).toBeCalledTimes(0)
-    })
+        expect(rejectedMessages).toHaveLength(1)
 
+        expect(mockTableInteractor.getEcid).toHaveBeenCalledTimes(1)
+    })
 })
 
 const getMockSqsRecord = (message: string): SQSRecord => {

@@ -11,8 +11,8 @@ export default class TableInteractor {
     private readonly awsRegion!: string
     @Inject("ec_table_name")
     private readonly ecStoreName!: string
-    @Inject("ec_mobile_index")
-    private readonly ecMobileIndexName!: string
+    @Inject("ec_email_index")
+    private readonly ecEmailIndexName!: string
     @Inject("responsibility_table_name")
     private readonly responsibilityStoreName!: string
     @Inject()
@@ -35,11 +35,11 @@ export default class TableInteractor {
     public async getEcid(user: User): Promise<string> {
       const params: QueryInput = {
         TableName: this.ecStoreName,
-        IndexName: this.ecMobileIndexName,
-        KeyConditionExpression: "mobile = :m",
+        IndexName: this.ecEmailIndexName,
+        KeyConditionExpression: "email = :e",
         ExpressionAttributeValues: {
-          ":m": {
-            S: user.mobile
+          ":e": {
+            S: user.email
           }
         }
       }

@@ -19,18 +19,19 @@ export default class EmailSender {
         });
     }
 
-    async sendEmail(responsibility: Responsibility) {
+    async sendEmail(responsibility: Responsibility, EC: User) {
         try {
             await this.emailService.sendTemplatedEmail({
                 Source: this.emailSource,
                 Destination: {
                     ToAddresses: [
-                        "the-email-of-the-ec"
+                        EC.email
                     ],
                 },
                 Template: this.emailTemplateName,
                 TemplateData: `{
                     "greenName": "%FIRST_NAME_STILL_NEEDS_FETCHING%",
+                    "ecName": "${EC.f_name}",
                     "RID": "${responsibility.RID}"
                 }`.replace(/\s/g, "")  // removes any whitespace/newlines
             }).promise();

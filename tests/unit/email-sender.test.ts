@@ -44,22 +44,27 @@ describe("Email Sender", () => {
             RID: "NTcyNTdlYTktYWQ1ZS00NWNhLWEwZDAtMTZlNjA2OTUzODZl",
             greenId: "a-green-users-id"
         }
-
+        
+        const EC = {
+            f_name: "John",
+            email: "john.smith@yahoo.com"
+        }
         // when
         let sut = Container.get(EmailSender)
-        await sut.sendEmail(responsibility);
+        await sut.sendEmail(responsibility, EC);
         
         // then
         expect(mockSES.sendTemplatedEmail).toHaveBeenCalledWith({
             Source: "myfaveemail@safe-step.net",
             Destination: {
                 ToAddresses: [
-                    "the-email-of-the-ec"
+                    "john.smith@yahoo.com"
                 ],
             },
             Template: "wibble",
             TemplateData: `{
                 "greenName": "%FIRST_NAME_STILL_NEEDS_FETCHING%",
+                "ecName": "John",
                 "RID": "NTcyNTdlYTktYWQ1ZS00NWNhLWEwZDAtMTZlNjA2OTUzODZl"
             }`.replace(/\s/g, "")
         });

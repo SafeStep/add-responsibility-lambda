@@ -14,7 +14,7 @@ describe("Table Interactor class tests", () => {
     let sut: TableInteractor;  // subject under test
 
     const EC_TABLE_NAME = "example_ecid_store";
-    const EC_TABLE_MOBILE_INDEX = "example_mobile_index";
+    const EC_TABLE_EMAIL_INDEX = "example_email_index";
     const RESPONSIBILITY_TABLE_NAME = "example_responsibility_store"
 
     var mockDocumentClient: DocumentClient;
@@ -23,7 +23,7 @@ describe("Table Interactor class tests", () => {
         Container.set("aws_region", "");
         Container.set("db_endpoint", "");
         Container.set("ec_table_name", EC_TABLE_NAME);
-        Container.set("ec_mobile_index", EC_TABLE_MOBILE_INDEX);
+        Container.set("ec_email_index", EC_TABLE_EMAIL_INDEX);
         Container.set("responsibility_table_name", RESPONSIBILITY_TABLE_NAME);
 
         mockDocumentClient = new DocumentClient();
@@ -34,7 +34,7 @@ describe("Table Interactor class tests", () => {
         Container.remove("aws_region");
         Container.remove("db_endpoint");
         Container.remove("ec_table_name");
-        Container.remove("ec_mobile_index");
+        Container.remove("ec_email_index");
     })
 
     afterEach(async () => {
@@ -78,11 +78,11 @@ describe("Table Interactor class tests", () => {
             // then
             const expectedParams: QueryInput = {
                 TableName: "example_ecid_store",
-                IndexName: "example_mobile_index",
-                KeyConditionExpression: "mobile = :m",
+                IndexName: "example_email_index",
+                KeyConditionExpression: "email = :e",
                 ExpressionAttributeValues: {
-                  ":m": {
-                    S: "12345678910"
+                  ":e": {
+                    S: "someones_email"
                   }
                 }
               }
@@ -120,11 +120,11 @@ describe("Table Interactor class tests", () => {
             // then
             const expectedParams: QueryInput = {
                 TableName: "example_ecid_store",
-                IndexName: "example_mobile_index",
-                KeyConditionExpression: "mobile = :m",
+                IndexName: "example_email_index",
+                KeyConditionExpression: "email = :e",
                 ExpressionAttributeValues: {
-                  ":m": {
-                    S: "12345678910"
+                  ":e": {
+                    S: "someones_email"
                   }
                 }
               }
