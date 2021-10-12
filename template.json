@@ -33,7 +33,7 @@
                             },  {
                                 "Effect":"Allow", 
                                 "Action":["sqs:SendMessage"], 
-                                "Resource": {"Fn::GetAtt":["AddResponsibilityQueue", "Arn"]}
+                                "Resource": {"Fn::GetAtt":["AddResponsibilityQueueDLQ", "Arn"]}
                             }
                         ]
                     }
@@ -44,7 +44,11 @@
             "Type":"AWS::SQS::Queue", 
             "Properties": {
                 "DelaySeconds": 0,
-                "QueueName": "add-responsibility-queue"
+                "QueueName": "add-responsibility-queue",
+                "RedrivePolicy": {
+                    "deadLetterTargetArn": {"Fn::GetAtt":["AddResponsibilityQueueDLQ", "Arn"]},
+                    "maxReceiveCount": 3
+                }
             }
         },
         "AddResponsibilityQueueDLQ": {
@@ -60,10 +64,18 @@
                 "FunctionName":"add-responsibility", 
                 "Role": {"Fn::GetAtt":["AddResponsibilityRole", "Arn"] }, 
                 "Runtime":"nodejs12.x", 
-                "Handler":"src/index.handler", 
+                "Handler":"dist/index.handler", 
+                "DeadLetterConfig": {
+                    "TargetArn": {"Fn::GetAtt":["AddResponsibilityQueueDLQ", "Arn"] }
+                },
                 "Code": {
                     "S3Bucket":"safe-step-lambda-functions-source", 
                     "S3Key":"add-responsibility.zip"
+                },
+                "Environment": {
+                    "Variables": {
+                        "NODE_ENV": "production"
+                    }
                 }
             }
         },

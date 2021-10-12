@@ -7,8 +7,7 @@
         "test-unit": "jest unit --coverage --runInBand",
         "test-int": "jest int",
         "start": "node dist/index.js",
-        "build": "tsc -b",
-        "build-zip": "tsc -b && powershell Compress-Archive dist add-responsibility.zip"
+        "build": "bash build.sh"
     },
     "repository": {
         "type": "git",
