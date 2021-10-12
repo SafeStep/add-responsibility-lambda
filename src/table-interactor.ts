@@ -79,7 +79,7 @@ export default class TableInteractor {
     
     createUserWithResponsibility(user: User, greenUserId: string ) {
       const ECID = this.createEC(user);
-      this.createResponsibility(ECID, greenUserId);
+      return [this.createResponsibility(ECID, greenUserId), ECID];
     }
 
     createResponsibility(ECID: string, greenUserId: string) {
@@ -102,6 +102,7 @@ export default class TableInteractor {
           }
         }
       })
+      return RID;
     }
 
     private resetInsertionParams() {

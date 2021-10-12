@@ -27,3 +27,8 @@ interface Responsibility {
     RID: string,
     greenId: string
 }
+
+interface InviteEmail {
+    resp: Responsibility,
+    EC: User
+}

@@ -4,6 +4,7 @@ import Processor from "../../src/processor";
 import EmailSender from "../../src/email-sender";
 import { SQSRecord, SQSEvent } from "aws-lambda";
 import Container from "typedi";
+import InputValidationRules from "../../src/validator/input-validation-result";
 
 describe("Processor class tests", () => {
     let sut: Processor;  // subject under test
@@ -13,22 +14,32 @@ describe("Processor class tests", () => {
 
     beforeAll(() => {
         mockTableInteractor = new TableInteractor("ec_store_name", "resp_store_name")
-        mockValidator = Container.get(Validator);
+        mockValidator = new Validator({} as InputValidationRules);
         mockEmailSender = new EmailSender();
+
+        mockTableInteractor.createResponsibility = jest.fn();
+        mockTableInteractor.createUserWithResponsibility = jest.fn()
         mockTableInteractor.executeInsertions = jest.fn();
     })
 
     beforeEach(() => {
         Container.set(EmailSender, mockEmailSender);
-        sut = new Processor(mockTableInteractor, mockValidator);
+        Container.set(TableInteractor, mockTableInteractor);
+        Container.set(Validator, mockValidator);
+        sut = Container.get(Processor)
+    })
+
+    afterAll(() => {
+        Container.remove(EmailSender);
+        Container.remove(TableInteractor);
+        Container.remove(Validator);
     })
 
     test("Create pending user when phone is not found in database", async () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
         mockTableInteractor.getEcid = jest.fn().mockReturnValue("");
-        mockTableInteractor.createUserWithResponsibility = jest.fn();
-        mockTableInteractor.executeInsertions = jest.fn();
+        mockTableInteractor.createUserWithResponsibility = jest.fn().mockReturnValue(["123", "321"]);
         mockEmailSender.sendEmail = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
@@ -64,14 +75,24 @@ describe("Processor class tests", () => {
             f_name: "John",
             email: "john.smith@gmail.com",
         }, "12345678-1234-1234-1234-123456789123")
+        expect(mockTableInteractor.executeInsertions).toHaveBeenCalled();
+        expect(mockEmailSender.sendEmail).toHaveBeenCalledTimes(1)
+        expect(mockEmailSender.sendEmail).toHaveBeenCalledWith({
+            ECID: "321",
+            RID: "123",
+            greenId: "12345678-1234-1234-1234-123456789123"
+        }, {
+            mobile: "12345678910",
+            dialing_code: 1,
+            f_name: "John",
+            email: "john.smith@gmail.com",
+        })
     });
 
     test("Add responsibility to already existing user", async () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
         mockTableInteractor.getEcid = jest.fn().mockReturnValue("c2ca44a9-f658-45dc-933c-038d0425a847");
-        mockTableInteractor.createResponsibility = jest.fn();
-        mockEmailSender.sendEmail = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
@@ -107,8 +128,6 @@ describe("Processor class tests", () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: false, individualResults: new Map()})
         mockTableInteractor.getEcid = jest.fn();
-        mockTableInteractor.executeInsertions = jest.fn();
-        mockEmailSender.sendEmail = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
@@ -139,8 +158,6 @@ describe("Processor class tests", () => {
         .mockReturnValueOnce({passed: false, individualResults: new Map()})
         .mockReturnValueOnce({passed: true, individualResults: new Map()})
         mockTableInteractor.getEcid = jest.fn();
-        mockTableInteractor.executeInsertions = jest.fn();
-        mockEmailSender.sendEmail = jest.fn();
 
         const fakeSqsEvent: SQSEvent = {
             Records: [
@@ -170,7 +187,6 @@ describe("Processor class tests", () => {
             greenId: "12345678-1234-1234-1234-123456789123"
         })));
         expect(rejectedMessages).toHaveLength(1)
-
         expect(mockTableInteractor.getEcid).toHaveBeenCalledTimes(1)
     })
 })
