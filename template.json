@@ -61,11 +61,19 @@
                 "Role": {"Fn::GetAtt":["AddResponsibilityRole", "Arn"] }, 
                 "Runtime":"nodejs12.x", 
                 "Handler":"src/index.handler", 
-                "EventSourceArn": {"Fn::GetAtt":["AddResponsibilityQueue", "Arn"]}, 
                 "Code": {
                     "S3Bucket":"safe-step-lambda-functions-source", 
                     "S3Key":"add-responsibility.zip"
                 }
+            }
+        },
+        "AddResponsibilityLambdaEventSourceMapping" : {
+            "Type": "AWS::Lambda::EventSourceMapping",
+            "Properties": {
+                "BatchSize": 5,
+                "Enabled": true,
+                "EventSourceArn": {"Fn::GetAtt":["AddResponsibilityQueue", "Arn"]},
+                "FunctionName": {"Fn::GetAtt":["AddResponsibilityLambda", "Arn"]}
             }
         }
     }
