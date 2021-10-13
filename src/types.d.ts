@@ -16,7 +16,7 @@ interface ValidationResult {
 }
 
 interface User {
-    mobile?: string,
+    phone?: string,
     dialing_code?: string,
     f_name: string,
     email: string,

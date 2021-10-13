@@ -72,23 +72,23 @@ describe("Table Interactor class tests", () => {
             const result = await sut.getEcid({
                 f_name: "bruh",
                 email: "someones_email",
-                mobile: "12345678910",
+                phone: "12345678910",
                 dialing_code: "44"
             });
             // then
-            const expectedParams: QueryInput = {
+            const expectedParams = {
                 TableName: "example_ecid_store",
                 IndexName: "example_email_index",
                 KeyConditionExpression: "email = :e",
-                ExpressionAttributeNames: {
-                    ":e": "someones_email"
+                ExpressionAttributeValues: {
+                  ":e": "someones_email"
                 }
               }
             expect(mockDocumentClient.query).toHaveBeenCalledWith(expectedParams);
             expect(result).toBe("f428015d-4c42-4505-b6ab-e31fdb2691d3");
         });
 
-        it("should return false mobile is not found in ec store", async () => {
+        it("should return false phone is not found in ec store", async () => {
             // given
             //@ts-ignore ignore this because it will not perfectly match the object
             mockDocumentClient.query = jest.fn(() => {
@@ -112,15 +112,15 @@ describe("Table Interactor class tests", () => {
             const result = await sut.getEcid({
                 f_name: "bruh",
                 email: "someones_email",
-                mobile: "12345678910",
+                phone: "12345678910",
                 dialing_code: "44"
             });
             // then
-            const expectedParams: QueryInput = {
+            const expectedParams = {
                 TableName: "example_ecid_store",
                 IndexName: "example_email_index",
                 KeyConditionExpression: "email = :e",
-                ExpressionAttributeNames: {
+                ExpressionAttributeValues: {
                   ":e": "someones_email"
                 }
               }
@@ -135,21 +135,9 @@ describe("Table Interactor class tests", () => {
             const fakeUser = {
                 f_name: "John",
                 email: "john.smith@gmail.com",
-                mobile: "12345678910",
+                phone: "12345678910",
                 dialing_code: "44"
             }
-
-            //@ts-ignore
-            mockDocumentClient.put = jest.fn(() => {
-                return {
-                    promise: () => {
-                        return new Promise((resolve, reject) => {
-                            //@ts-ignore ignore this because it will not perfectly match the object
-                            resolve({})
-                        });
-                    }
-                }
-            });
 
             sut = Container.get(TableInteractor);
 
@@ -166,7 +154,7 @@ describe("Table Interactor class tests", () => {
                         email:  {
                             S: "john.smith@gmail.com" 
                         },
-                        mobile: {
+                        phone: {
                             S: "12345678910"
                         },
                         dialing_code: {
@@ -201,18 +189,6 @@ describe("Table Interactor class tests", () => {
         it("Should create params for insertion of responsibility on already created user", async () => {
             // given
 
-            //@ts-ignore
-            mockDocumentClient.put = jest.fn(() => {
-                return {
-                    promise: () => {
-                        return new Promise((resolve, reject) => {
-                            //@ts-ignore ignore this because it will not perfectly match the object
-                            resolve({})
-                        });
-                    }
-                }
-            });
-
             sut = Container.get(TableInteractor);
 
             // when
@@ -243,29 +219,30 @@ describe("Table Interactor class tests", () => {
     describe("Execute insertions method", () => {
         it("should call execute insertions should be called for each scenario", async () => {
             // given
+
             //@ts-ignore
-            mockDocumentClient.put = jest.fn(() => {
+            mockDocumentClient.batchWrite = jest.fn(() => {
                 return {
                     promise: () => {
                         return new Promise((resolve, reject) => {
                             //@ts-ignore ignore this because it will not perfectly match the object
-                            resolve({})
-                        });
+                            resolve()
+                        })
                     }
                 }
-            });
-
-            mockDocumentClient.batchWrite = jest.fn();
+            })
 
             //@ts-ignore
             v4.mockReturnValueOnce("d1f05698-fbef-4fc8-954a-1dc505eace42") // used for RID for first responsibility
             .mockReturnValueOnce("11588249-465f-4ccf-8803-bd4d7d3da576")  // used for RID of new user and responsibility
             .mockReturnValueOnce("9aba95f5-5e8a-47ca-95b9-307237203599")  // used for ECID of new user
 
+            sut = Container.get(TableInteractor);
+
             sut.createResponsibility("123", "something-else")
             sut.createUserWithResponsibility({
                 f_name: "John",
-                mobile: "12345678910",
+                phone: "12345678910",
                 dialing_code: "44",
                 email: "someones-email@yah.com"
             }, "some-green-user")
@@ -327,7 +304,7 @@ describe("Table Interactor class tests", () => {
                                     "f_name": {
                                         "S": "John"
                                     },
-                                    "mobile": {
+                                    "phone": {
                                         "S": "12345678910"
                                     },
                                     "dialing_code": {

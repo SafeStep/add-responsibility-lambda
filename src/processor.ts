@@ -52,8 +52,11 @@ export default class Processor {
             await this.emailSender.sendEmail(email.resp, email.EC)
         });
 
-        console.log("Rejected messages the following:")
-        console.log(rejectedMessages);
+        if (rejectedMessages.length > 0) {  // display rejected messages if they exist
+            console.log("Rejected messages the following:")
+            console.log(rejectedMessages);
+        }
+        
         return rejectedMessages;
     }
 }

@@ -34,11 +34,11 @@ export default class TableInteractor {
     
     public async getEcid(user: User): Promise<string> {
       console.log("requesting ID")
-      const params: QueryInput = {
+      const params = {
         TableName: this.ecStoreName,
         IndexName: this.ecEmailIndexName,
         KeyConditionExpression: "email = :e",
-        ExpressionAttributeNames: {
+        ExpressionAttributeValues: {
           ":e": user.email
         }
       }
@@ -63,8 +63,8 @@ export default class TableInteractor {
             f_name: {
               S: user.f_name
             },
-            mobile: {
-              S: user.mobile
+            phone: {
+              S: user.phone
             },
             dialing_code: {
               S: user.dialing_code
@@ -114,10 +114,12 @@ export default class TableInteractor {
     }
 
     async executeInsertions() {
-      console.log("Beginning insertion into tables")
-      await this.docClient.batchWrite({
+      console.log("Beginning insertion into tables");
+      console.log(this.insertionParams);
+      const result = await this.docClient.batchWrite({
         RequestItems: this.insertionParams
-      });
+      }).promise();
+      console.log(result);
       console.log("Completed insertions")
       this.resetInsertionParams()  // reset the insertion params
     }

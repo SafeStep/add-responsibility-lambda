@@ -21,11 +21,11 @@
                             },  {
                                 "Effect":"Allow", 
                                 "Action":["dynamodb:Query", "dynamodb:BatchWriteItem"], 
-                                "Resource":"arn:aws:dynamodb:eu-west-1:209523969378:responsibility-store"
+                                "Resource":"arn:aws:dynamodb:eu-west-1:209523969378:table/responsibility-store"
                             },  {
                                 "Effect":"Allow", 
                                 "Action":["dynamodb:GetItem", "dynamodb:Query", "dynamodb:BatchWriteItem"], 
-                                "Resource":"arn:aws:dynamodb:eu-west-1:209523969378:emergency-contact-store"
+                                "Resource":"arn:aws:dynamodb:eu-west-1:209523969378:table/emergency-contact-store"
                             },  {
                                 "Effect":"Allow", 
                                 "Action":["dynamodb:Query"], 
@@ -75,7 +75,7 @@
                 "Code": {
                     "S3Bucket":"safe-step-lambda-functions-source", 
                     "S3Key":"add-responsibility.zip",
-                    "S3ObjectVersion": "q1fJauYwgqlhd3OIvBv7PVCrcqIqeAHT"
+                    "S3ObjectVersion": "cUjm3OSOLrVYNgxi4_2cMeJIuohR5_sW"
                 },
                 "Environment": {
                     "Variables": {

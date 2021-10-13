@@ -36,7 +36,7 @@ The root directory must be compiled into a .zip, then stored in the S3 bucket ca
 The input to the lambda is a SQS, which should have elements of the following structure:
 ```
 {
-    "mobile": "12345678910",
+    "phone": "12345678910",
     "dialing_code": 1,
     "f_name": "John",
     "email": "john.smith@gmail.com",
@@ -54,4 +54,4 @@ OR
 }
 ```
 
-As mobile number is optional when a green user creates a new emergency contact
+As phone number and dialing code is optional when a green user creates a new emergency contact

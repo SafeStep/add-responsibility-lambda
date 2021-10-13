@@ -7,7 +7,7 @@
             "required": true
         },
         {
-            "name": "mobile",
+            "name": "phone",
             "required": false
         },
         {

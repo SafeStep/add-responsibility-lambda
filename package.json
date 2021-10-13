@@ -4,7 +4,7 @@
     "description": "Lambda for a green user to add a responsibility to their account",
     "main": "index.js",
     "scripts": {
-        "test-unit": "jest unit --coverage --runInBand",
+        "test-unit": "jest unit --coverage --runInBand --silent",
         "test-int": "jest int",
         "start": "node dist/index.js",
         "build": "bash build.sh"
