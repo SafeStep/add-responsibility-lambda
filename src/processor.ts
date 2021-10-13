@@ -48,9 +48,10 @@ export default class Processor {
             }, EC: EC})
         };
         await this.tableInteractor.executeInsertions();  // add the contents to the dynamodb in one batch run
-        emailsToSend.forEach(async email => {
+        
+        for (const email of emailsToSend) {
             await this.emailSender.sendEmail(email.resp, email.EC)
-        });
+        }
 
         if (rejectedMessages.length > 0) {  // display rejected messages if they exist
             console.log("Rejected messages the following:")

@@ -38,6 +38,16 @@
                                 "Effect":"Allow", 
                                 "Action":["sqs:SendMessage"], 
                                 "Resource": {"Fn::GetAtt":["AddResponsibilityQueueDLQ", "Arn"]}
+                            },
+                            {
+                                "Effect":"Allow", 
+                                "Action":["ses:SendTemplatedEmail"], 
+                                "Resource": "arn:aws:ses:eu-west-1:209523969378:identity/*",
+                                "Condition":{
+                                    "StringEquals":{
+                                      "ses:FromAddress": "donotreply@safe-step.net"
+                                    }
+                                  }
                             }
                         ]
                     }
@@ -75,7 +85,7 @@
                 "Code": {
                     "S3Bucket":"safe-step-lambda-functions-source", 
                     "S3Key":"add-responsibility.zip",
-                    "S3ObjectVersion": "gB4ZrZwwcQCKJ6dYi3ufaChxxeg_bNU1"
+                    "S3ObjectVersion": "ih9izVK2YlpnNnKm29Q8HogvBgfAK0Yy"
                 },
                 "Environment": {
                     "Variables": {

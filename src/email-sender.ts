@@ -22,7 +22,7 @@ export default class EmailSender {
     async sendEmail(responsibility: Responsibility, EC: User) {
         try {
             console.log("Sending email to EC")
-            await this.emailService.sendTemplatedEmail({
+            const params = {
                 Source: this.emailSource,
                 Destination: {
                     ToAddresses: [
@@ -35,7 +35,10 @@ export default class EmailSender {
                     "ecName": "${EC.f_name}",
                     "RID": "${responsibility.RID}"
                 }`.replace(/\s/g, "")  // removes any whitespace/newlines
-            }).promise();
+            }
+            console.log(params);
+            const result = await this.emailService.sendTemplatedEmail(params).promise();
+            console.log(result);
             console.log("Email sent")
         }
         catch (e) {

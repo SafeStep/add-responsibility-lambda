@@ -100,11 +100,15 @@ export default class TableInteractor {
     async executeInsertions() {
       console.log("Beginning insertion into tables");
       
-      console.log("New ECs:")
-      this.insertionParams[this.ecStoreName].forEach(item => {console.log(item.PutRequest?.Item)})
-      console.log("New Responsibilities:")
-      this.insertionParams[this.responsibilityStoreName].forEach(item => {console.log(item.PutRequest?.Item)})
+      this.removeTablesWithNoInsertions();
 
+      for(const [tableName, insertions] of Object.entries(this.insertionParams)) {
+          console.log(`Inserting into ${tableName}`);
+          insertions.forEach((item) => {
+            console.log(item.PutRequest?.Item)
+          })
+      }
+      
       try {
         const result = await this.docClient.batchWrite({
           RequestItems: this.insertionParams
@@ -118,6 +122,16 @@ export default class TableInteractor {
       }
       finally {
         this.resetInsertionParams()  // reset the insertion params
+      }
+    }
+
+    private removeTablesWithNoInsertions() {
+      const copyObject = {...this.insertionParams};
+
+      for(const [tableName, insertions] of Object.entries(copyObject)) {
+        if (insertions.length == 0) {  // there are no requests for this table
+          delete this.insertionParams[tableName];
+        }
       }
     }
 
