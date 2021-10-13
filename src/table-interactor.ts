@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import Container, { Inject, Service } from "typedi";
-import { BatchWriteItemRequestMap, DocumentClient, QueryInput } from "aws-sdk/clients/dynamodb";
+import { DocumentClient, QueryInput } from "aws-sdk/clients/dynamodb";
 import * as AWS from "aws-sdk";
 import { v4 as uuidv4 } from 'uuid';
 import base64url from "base64url";
@@ -18,7 +18,7 @@ export default class TableInteractor {
     @Inject()
     private docClient!: DocumentClient
 
-    private insertionParams: BatchWriteItemRequestMap
+    private insertionParams: DocumentClient.BatchWriteItemRequestMap
     
     constructor(
       @Inject("ec_table_name") ecStoreName: string,
@@ -57,21 +57,11 @@ export default class TableInteractor {
       this.insertionParams[this.ecStoreName].push ({
         PutRequest: {
           Item: {
-            ECID: {
-              S: ECID
-            },
-            f_name: {
-              S: user.f_name
-            },
-            phone: {
-              S: user.phone
-            },
-            dialing_code: {
-              S: user.dialing_code
-            },
-            email: {
-              S: user.email
-            }
+            ECID: ECID,
+            f_name: user.f_name,
+            phone: user.phone,
+            dialing_code: user.dialing_code,
+            email: user.email
           }
         }
       })
@@ -89,18 +79,10 @@ export default class TableInteractor {
       this.insertionParams[this.responsibilityStoreName].push ({
         PutRequest: {
           Item: {
-            ECID: {
-              S: ECID
-            },
-            RID: {
-              S: RID
-            },
-            greenId: {
-              S: greenUserId
-            },
-            status: {
-              S: "pending"
-            }
+            ECID: ECID,
+            RID: RID,
+            greenID:greenUserId,
+            status:"pending"
           }
         }
       })
@@ -108,23 +90,38 @@ export default class TableInteractor {
     }
 
     private resetInsertionParams() {
+      console.log("Emptying stored insertions")
       this.insertionParams = {};
       this.insertionParams[this.ecStoreName] = []
       this.insertionParams[this.responsibilityStoreName] = []
+      console.log("Cleared stored insertions")
     }
 
     async executeInsertions() {
       console.log("Beginning insertion into tables");
-      console.log(this.insertionParams);
-      const result = await this.docClient.batchWrite({
-        RequestItems: this.insertionParams
-      }).promise();
-      console.log(result);
+      
+      console.log("New ECs:")
+      this.insertionParams[this.ecStoreName].forEach(item => {console.log(item.PutRequest?.Item)})
+      console.log("New Responsibilities:")
+      this.insertionParams[this.responsibilityStoreName].forEach(item => {console.log(item.PutRequest?.Item)})
+
+      try {
+        const result = await this.docClient.batchWrite({
+          RequestItems: this.insertionParams
+        }).promise();
+        console.log(result);
       console.log("Completed insertions")
-      this.resetInsertionParams()  // reset the insertion params
+      }
+      catch(e) {
+        console.log("Insertion failed")
+        console.error(e);
+      }
+      finally {
+        this.resetInsertionParams()  // reset the insertion params
+      }
     }
 
-    getInsertionParams(): BatchWriteItemRequestMap {
+    getInsertionParams(): DocumentClient.BatchWriteItemRequestMap {
       return this.insertionParams;
     }
 }

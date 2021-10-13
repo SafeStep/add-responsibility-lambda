@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { DocumentClient, QueryInput } from "aws-sdk/clients/dynamodb";
+import { DocumentClient} from "aws-sdk/clients/dynamodb";
 import TableInteractor from "../../src/table-interactor";
 import Container from "typedi";
 import { v4 } from 'uuid';
@@ -148,39 +148,21 @@ describe("Table Interactor class tests", () => {
             expect(sut.getInsertionParams()[EC_TABLE_NAME]).toContainEqual({
                 PutRequest: {
                     Item: {
-                        f_name: {
-                            S: "John"
-                        },
-                        email:  {
-                            S: "john.smith@gmail.com" 
-                        },
-                        phone: {
-                            S: "12345678910"
-                        },
-                        dialing_code: {
-                            S: "44"
-                        },
-                        ECID:  {
-                            S: "3edea470-3fd7-4421-a17a-c0e754faae35"
-                        }
+                        f_name: "John",
+                        email: "john.smith@gmail.com",
+                        phone: "12345678910",
+                        dialing_code: "44",
+                        ECID: "3edea470-3fd7-4421-a17a-c0e754faae35",
                     }
                 }
             });
             expect(sut.getInsertionParams()[RESPONSIBILITY_TABLE_NAME]).toContainEqual({
                 PutRequest: {
                     Item: {
-                        ECID: {
-                            S: "3edea470-3fd7-4421-a17a-c0e754faae35"
-                        },
-                        RID: {
-                            S: "ZDIwNjM5MWYtY2IxYy00ZGNlLTg3YTQtNjM4YWJhNDg0ZjAw"
-                        },
-                        greenId: {
-                            S: "12345678-1234-1234-1234-123456789012"
-                        },
-                        status: {
-                            S: "pending"
-                        }
+                        ECID: "3edea470-3fd7-4421-a17a-c0e754faae35",
+                        RID:"ZDIwNjM5MWYtY2IxYy00ZGNlLTg3YTQtNjM4YWJhNDg0ZjAw",
+                        greenID: "12345678-1234-1234-1234-123456789012",
+                        status: "pending",
                     }
                 }
             })
@@ -198,18 +180,10 @@ describe("Table Interactor class tests", () => {
             expect(sut.getInsertionParams()[RESPONSIBILITY_TABLE_NAME]).toContainEqual({
                 PutRequest: {
                     Item: {
-                        ECID: {
-                            S: "3edea470-3fd7-4421-a17a-c0e754faae35"
-                        },
-                        RID: {
-                            S: "NjE3N2FjOWYtZGUyMS00YjlhLTliM2EtZjVmOWU3MDM2NmZk"
-                        },
-                        greenId: {
-                            S: "12345678-1234-1234-1234-123456789012"
-                        },
-                        status: {
-                            S: "pending"
-                        }
+                        ECID: "3edea470-3fd7-4421-a17a-c0e754faae35",
+                        RID: "NjE3N2FjOWYtZGUyMS00YjlhLTliM2EtZjVmOWU3MDM2NmZk",
+                        greenID:"12345678-1234-1234-1234-123456789012",
+                        status: "pending",
                     }
                 }
             })
@@ -257,36 +231,21 @@ describe("Table Interactor class tests", () => {
                         {
                             "PutRequest": {
                                 "Item": {
-                                    "ECID": {
-                                        "S": "123"
-                                    },
-                                    "RID": {
-                                        "S": "ZDFmMDU2OTgtZmJlZi00ZmM4LTk1NGEtMWRjNTA1ZWFjZTQy"
-                                    },
-                                    "greenId": {
-                                        "S": "something-else"
-                                    },
-                                    "status": {
-                                        "S": "pending"
-                                    }
+                                    "ECID": "123",
+                                    "RID": "ZDFmMDU2OTgtZmJlZi00ZmM4LTk1NGEtMWRjNTA1ZWFjZTQy",
+                                    "greenID":"something-else",
+                                    "status":"pending"
                                 }
                             }
+                            
                         },
                         {
                             "PutRequest": {
                                 "Item": {
-                                    "ECID": {
-                                        "S": "11588249-465f-4ccf-8803-bd4d7d3da576"
-                                    },
-                                    "RID": {
-                                        "S": "OWFiYTk1ZjUtNWU4YS00N2NhLTk1YjktMzA3MjM3MjAzNTk5"
-                                    },
-                                    "greenId": {
-                                        "S": "some-green-user"
-                                    },
-                                    "status": {
-                                        "S": "pending"
-                                    }
+                                    "ECID":"11588249-465f-4ccf-8803-bd4d7d3da576",
+                                    "RID":"OWFiYTk1ZjUtNWU4YS00N2NhLTk1YjktMzA3MjM3MjAzNTk5",
+                                    "greenID": "some-green-user",
+                                    "status": "pending"
                                 }
                             }
                         },
@@ -295,21 +254,11 @@ describe("Table Interactor class tests", () => {
                         {
                             "PutRequest": {
                                 "Item": {
-                                    "ECID": {
-                                        "S": "11588249-465f-4ccf-8803-bd4d7d3da576"
-                                    },
-                                    "email": {
-                                        "S": "someones-email@yah.com"
-                                    },
-                                    "f_name": {
-                                        "S": "John"
-                                    },
-                                    "phone": {
-                                        "S": "12345678910"
-                                    },
-                                    "dialing_code": {
-                                        "S": "44"
-                                    },
+                                    "ECID": "11588249-465f-4ccf-8803-bd4d7d3da576",
+                                    "email": "someones-email@yah.com",
+                                    "f_name": "John",
+                                    "phone": "12345678910",
+                                    "dialing_code": "44",
                                 }
                             }
                         },
