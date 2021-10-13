@@ -30,6 +30,9 @@ export default class Processor {
             delete jsonBody.greenId;  // remove the greenId from the jsonbody
             const EC: User = jsonBody;
 
+            console.log("passed validation");
+            console.log(`creating responsibility for user with id ${greenId}`)
+
             let ECID = await this.tableInteractor.getEcid(jsonBody);
             let RID;
             if (ECID === "") {
@@ -44,10 +47,13 @@ export default class Processor {
                 greenId: greenId
             }, EC: EC})
         };
-        this.tableInteractor.executeInsertions();  // add the contents to the dynamodb in one batch run
-        emailsToSend.forEach(email => {
-            this.emailSender.sendEmail(email.resp, email.EC)
+        await this.tableInteractor.executeInsertions();  // add the contents to the dynamodb in one batch run
+        emailsToSend.forEach(async email => {
+            await this.emailSender.sendEmail(email.resp, email.EC)
         });
+
+        console.log("Rejected messages the following:")
+        console.log(rejectedMessages);
         return rejectedMessages;
     }
 }

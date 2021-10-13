@@ -7,5 +7,5 @@ import Processor from "./processor";
 export const handler = async (event: SQSEvent) => {
     await Injector.init();
     const processor = Container.get(Processor);
-    processor.process(event);
+    await processor.process(event);
 }

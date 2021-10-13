@@ -33,14 +33,13 @@ export default class TableInteractor {
       }
     
     public async getEcid(user: User): Promise<string> {
+      console.log("requesting ID")
       const params: QueryInput = {
         TableName: this.ecStoreName,
         IndexName: this.ecEmailIndexName,
         KeyConditionExpression: "email = :e",
-        ExpressionAttributeValues: {
-          ":e": {
-            S: user.email
-          }
+        ExpressionAttributeNames: {
+          ":e": user.email
         }
       }
 
@@ -48,11 +47,13 @@ export default class TableInteractor {
 
       if (result.Items === undefined || result.Items.length === 0) return ""
 
+      console.log("resolved ID")
       return result.Items![0].ECID;
     }
 
     private createEC(user: User): string {
       const ECID = uuidv4();
+      console.log(`Creating new EC locally with ECID: ${ECID}`)
       this.insertionParams[this.ecStoreName].push ({
         PutRequest: {
           Item: {
@@ -83,6 +84,7 @@ export default class TableInteractor {
     }
 
     createResponsibility(ECID: string, greenUserId: string) {
+      console.log(`creating local responsibility between ECID ${ECID} and greenId: ${greenUserId}`);
       const RID = base64url(uuidv4());
       this.insertionParams[this.responsibilityStoreName].push ({
         PutRequest: {
@@ -112,9 +114,11 @@ export default class TableInteractor {
     }
 
     async executeInsertions() {
+      console.log("Beginning insertion into tables")
       await this.docClient.batchWrite({
         RequestItems: this.insertionParams
       });
+      console.log("Completed insertions")
       this.resetInsertionParams()  // reset the insertion params
     }
 

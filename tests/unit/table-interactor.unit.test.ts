@@ -80,10 +80,8 @@ describe("Table Interactor class tests", () => {
                 TableName: "example_ecid_store",
                 IndexName: "example_email_index",
                 KeyConditionExpression: "email = :e",
-                ExpressionAttributeValues: {
-                  ":e": {
-                    S: "someones_email"
-                  }
+                ExpressionAttributeNames: {
+                    ":e": "someones_email"
                 }
               }
             expect(mockDocumentClient.query).toHaveBeenCalledWith(expectedParams);
@@ -122,10 +120,8 @@ describe("Table Interactor class tests", () => {
                 TableName: "example_ecid_store",
                 IndexName: "example_email_index",
                 KeyConditionExpression: "email = :e",
-                ExpressionAttributeValues: {
-                  ":e": {
-                    S: "someones_email"
-                  }
+                ExpressionAttributeNames: {
+                  ":e": "someones_email"
                 }
               }
             expect(mockDocumentClient.query).toHaveBeenCalledWith(expectedParams);

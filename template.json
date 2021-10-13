@@ -28,6 +28,10 @@
                                 "Resource":"arn:aws:dynamodb:eu-west-1:209523969378:emergency-contact-store"
                             },  {
                                 "Effect":"Allow", 
+                                "Action":["dynamodb:Query"], 
+                                "Resource":"arn:aws:dynamodb:eu-west-1:209523969378:table/emergency-contact-store/index/email-Index"
+                            },  {
+                                "Effect":"Allow", 
                                 "Action":["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"], 
                                 "Resource": {"Fn::GetAtt":["AddResponsibilityQueue", "Arn"]}
                             },  {
@@ -70,7 +74,8 @@
                 },
                 "Code": {
                     "S3Bucket":"safe-step-lambda-functions-source", 
-                    "S3Key":"add-responsibility.zip"
+                    "S3Key":"add-responsibility.zip",
+                    "S3ObjectVersion": "q1fJauYwgqlhd3OIvBv7PVCrcqIqeAHT"
                 },
                 "Environment": {
                     "Variables": {
