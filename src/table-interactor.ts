@@ -39,7 +39,7 @@ export default class TableInteractor {
         IndexName: this.ecEmailIndexName,
         KeyConditionExpression: "email = :e",
         ExpressionAttributeValues: {
-          ":e": user.email
+          ":e": user.email.toLowerCase()
         }
       }
 
@@ -61,7 +61,7 @@ export default class TableInteractor {
             f_name: user.f_name,
             phone: user.phone,
             dialing_code: user.dialing_code,
-            email: user.email
+            email: user.email.toLowerCase()
           }
         }
       })

@@ -71,7 +71,7 @@ describe("Table Interactor class tests", () => {
             // when
             const result = await sut.getEcid({
                 f_name: "bruh",
-                email: "someones_email",
+                email: "someonES_email",  // this should be lowercased
                 phone: "12345678910",
                 dialing_code: "44"
             });
@@ -134,7 +134,7 @@ describe("Table Interactor class tests", () => {
             // given
             const fakeUser = {
                 f_name: "John",
-                email: "john.smith@gmail.com",
+                email: "john.SMITH@gmail.com",
                 phone: "12345678910",
                 dialing_code: "44"
             }
