@@ -16,13 +16,14 @@ describe("Processor class tests", () => {
         mockTableInteractor = new TableInteractor("ec_store_name", "resp_store_name")
         mockValidator = new Validator({} as InputValidationRules);
         mockEmailSender = new EmailSender();
+    })
+
+    beforeEach(() => {
 
         mockTableInteractor.createResponsibility = jest.fn();
         mockTableInteractor.createUserWithResponsibility = jest.fn()
         mockTableInteractor.executeInsertions = jest.fn();
-    })
 
-    beforeEach(() => {
         Container.set(EmailSender, mockEmailSender);
         Container.set(TableInteractor, mockTableInteractor);
         Container.set(Validator, mockValidator);
@@ -35,7 +36,7 @@ describe("Processor class tests", () => {
         Container.remove(Validator);
     })
 
-    test("Create pending user when phone is not found in database", async () => {
+    test("Create pending user when email is not found in database", async () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
         mockTableInteractor.getEcid = jest.fn().mockReturnValue("");
@@ -93,7 +94,7 @@ describe("Processor class tests", () => {
         // given
         mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
         mockTableInteractor.getEcid = jest.fn().mockReturnValue("c2ca44a9-f658-45dc-933c-038d0425a847");
-
+        mockTableInteractor.responsibilityExists = jest.fn().mockReturnValue(false);
         const fakeSqsEvent: SQSEvent = {
             Records: [getMockSqsRecord(`{
                 "phone": "12345678910",
@@ -121,8 +122,46 @@ describe("Processor class tests", () => {
             f_name: "John",
             email: "john.smith@gmail.com",
         })
+        expect(mockTableInteractor.responsibilityExists).toHaveBeenCalledWith("c2ca44a9-f658-45dc-933c-038d0425a847", "12345678-1234-1234-1234-123456789123")
         expect(mockTableInteractor.createResponsibility).toHaveBeenCalledWith("c2ca44a9-f658-45dc-933c-038d0425a847", "12345678-1234-1234-1234-123456789123");
-    });
+    })
+
+    it("Should not add a responsibility if one already exists", async () => {
+         // given
+         mockValidator.validate = jest.fn().mockReturnValue({passed: true, individualResults: new Map()})
+         mockTableInteractor.getEcid = jest.fn().mockReturnValue("c2ca44a9-f658-45dc-933c-038d0425a847");
+         mockTableInteractor.responsibilityExists = jest.fn().mockReturnValue(true);
+
+         const fakeSqsEvent: SQSEvent = {
+             Records: [getMockSqsRecord(`{
+                 "phone": "12345678910",
+                 "dialing_code": 1,
+                 "f_name": "John",
+                 "email": "john.smith@gmail.com",
+                 "greenId": "12345678-1234-1234-1234-123456789123"
+             }`)]
+         }
+         
+         // when
+         await sut.process(fakeSqsEvent);
+         
+         // then
+         expect(mockValidator.validate).toHaveBeenCalledWith(new Map(Object.entries({
+             phone: "12345678910",
+             dialing_code: 1,
+             f_name: "John",
+             email: "john.smith@gmail.com",
+             greenId: "12345678-1234-1234-1234-123456789123"
+         })));
+         expect(mockTableInteractor.getEcid).toHaveBeenCalledWith({
+             phone: "12345678910",
+             dialing_code: 1,
+             f_name: "John",
+             email: "john.smith@gmail.com",
+         })
+         expect(mockTableInteractor.responsibilityExists).toHaveBeenCalledWith("c2ca44a9-f658-45dc-933c-038d0425a847", "12345678-1234-1234-1234-123456789123")
+         expect(mockTableInteractor.createResponsibility).toHaveBeenCalledTimes(0)
+    })
 
     test("Exception is thrown if inputs are invalid", async () => {
         // given

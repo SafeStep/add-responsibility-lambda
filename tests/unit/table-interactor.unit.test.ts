@@ -16,6 +16,7 @@ describe("Table Interactor class tests", () => {
     const EC_TABLE_NAME = "example_ecid_store";
     const EC_TABLE_EMAIL_INDEX = "example_email_index";
     const RESPONSIBILITY_TABLE_NAME = "example_responsibility_store"
+    const GREEN_ID_INDEX = "greenID-Index"
 
     var mockDocumentClient: DocumentClient;
 
@@ -25,6 +26,7 @@ describe("Table Interactor class tests", () => {
         Container.set("ec_table_name", EC_TABLE_NAME);
         Container.set("ec_email_index", EC_TABLE_EMAIL_INDEX);
         Container.set("responsibility_table_name", RESPONSIBILITY_TABLE_NAME);
+        Container.set("responsibility_green_id_index", GREEN_ID_INDEX)
 
         mockDocumentClient = new DocumentClient();
         Container.set(DocumentClient, mockDocumentClient);
@@ -35,6 +37,8 @@ describe("Table Interactor class tests", () => {
         Container.remove("db_endpoint");
         Container.remove("ec_table_name");
         Container.remove("ec_email_index");
+        Container.remove("responsibility_table_name");
+        Container.remove("responsibility_green_id_index")
     })
 
     afterEach(async () => {
@@ -289,4 +293,93 @@ describe("Table Interactor class tests", () => {
             expect(mockDocumentClient.batchWrite).toBeCalledTimes(0)  // this should not be called
         })
     });
+
+    describe("Responsibility exists method", () => {
+        it("should not create a responsibility if one already exists remotely", async () => {
+
+            // given
+
+            //@ts-ignore
+            mockDocumentClient.query = jest.fn(() => {
+                return {
+                    promise: () => {
+                        return new Promise((resolve, reject) => {
+                            //@ts-ignore ignore this because it will not perfectly match the object
+                            resolve({
+                                Items: [{
+                                    ECID: "example_ecid",
+                                    RID: "wibble",
+                                    greenId: "example_green_id"
+                                }]
+                            })
+                        });
+                    }
+                }
+            });
+
+            sut = Container.get(TableInteractor)
+
+            // when 
+
+            const result = await sut.responsibilityExists("example_ecid", "example_green_id")
+
+            // then
+
+            const params = {
+                TableName: RESPONSIBILITY_TABLE_NAME,
+                IndexName: GREEN_ID_INDEX,
+                KeyConditionExpression: "greenID = :g",
+                ExpressionAttributeValues: {
+                  ":g": "example_green_id"
+                }
+            }
+
+            expect(mockDocumentClient.query).toHaveBeenCalledWith(params);
+            expect(result).toBe(true)
+        })
+
+        it("should not create a responsibility if one already exists in local memory", async () => {
+
+            // given 
+
+            //@ts-ignore
+            mockDocumentClient.query = jest.fn(() => {
+                return {
+                    promise: () => {
+                        return new Promise((resolve, reject) => {
+                            //@ts-ignore ignore this because it will not perfectly match the object
+                            resolve({
+                                Items: []
+                            })
+                        });
+                    }
+                }
+            });
+
+            //@ts-ignore
+            v4.mockReturnValueOnce("d1f05698-fbef-4fc8-954a-1dc505eace42") // used for RID for first responsibility
+
+            sut = Container.get(TableInteractor)
+
+            sut.createResponsibility("example_ecid", "example_green_id")
+
+            // when
+
+            const result = await sut.responsibilityExists("example_ecid", "example_green_id")
+
+            // then
+
+            const params = {
+                TableName: RESPONSIBILITY_TABLE_NAME,
+                IndexName: GREEN_ID_INDEX,
+                KeyConditionExpression: "greenID = :g",
+                ExpressionAttributeValues: {
+                  ":g": "example_green_id"
+                }
+            }
+
+            expect(mockDocumentClient.query).toHaveBeenCalledWith(params);
+            expect(result).toBe(true)
+        })
+    })
 });

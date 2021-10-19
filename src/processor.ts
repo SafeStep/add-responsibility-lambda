@@ -39,6 +39,10 @@ export default class Processor {
                 [RID, ECID] = this.tableInteractor.createUserWithResponsibility(EC, greenId);
             }
             else {
+                if (await this.tableInteractor.responsibilityExists(ECID, greenId)) {
+                    console.log("responsibility already exists")
+                    continue  // no need to execute this message
+                }
                 RID = this.tableInteractor.createResponsibility(ECID, greenId);
             }
             emailsToSend.push({resp: {
@@ -47,6 +51,7 @@ export default class Processor {
                 greenId: greenId
             }, EC: EC})
         };
+
         await this.tableInteractor.executeInsertions();  // add the contents to the dynamodb in one batch run
         
         for (const email of emailsToSend) {

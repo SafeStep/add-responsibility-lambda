@@ -5,5 +5,6 @@ module.exports = {
     ec_email_index: "something_else",
     responsibility_table_name: "another_store_name",
     email_template_name: "something-template",
-    email_source: "anotheremail@safe-step.net"
+    email_source: "anotheremail@safe-step.net",
+    responsibility_green_id_index: "whatever"
 }

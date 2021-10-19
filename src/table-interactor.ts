@@ -15,6 +15,8 @@ export default class TableInteractor {
     private readonly ecEmailIndexName!: string
     @Inject("responsibility_table_name")
     private readonly responsibilityStoreName!: string
+    @Inject("responsibility_green_id_index")
+    private readonly responsibilityGreenIdIndex!: string
     @Inject()
     private docClient!: DocumentClient
 
@@ -139,6 +141,34 @@ export default class TableInteractor {
       }
     }
 
+    async responsibilityExists(ecid: string, greenId: string) {
+      const params = {
+        TableName: this.responsibilityStoreName,
+        IndexName: this.responsibilityGreenIdIndex,
+        KeyConditionExpression: "greenID = :g",
+        ExpressionAttributeValues: {
+          ":g": greenId
+        }
+      }
+      
+      const result = await this.docClient.query(params).promise()
+      
+      if (result.Items && result.Items.filter(item => item.ECID == ecid).length > 0) {  // if a resp between ECID and GreenID already exists
+        return true
+      }
+
+      const matchingParams = this.insertionParams[this.responsibilityStoreName].filter(request => {
+        const item = request.PutRequest!.Item
+        return (item.ECID == ecid && item.greenID == greenId)
+      })
+
+      if (matchingParams.length > 0) {
+        return true
+      }
+
+      return false
+    }
+    
     getInsertionParams(): DocumentClient.BatchWriteItemRequestMap {
       return this.insertionParams;
     }
