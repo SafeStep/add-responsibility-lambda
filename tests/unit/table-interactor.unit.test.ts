@@ -267,5 +267,26 @@ describe("Table Interactor class tests", () => {
                 }
             })
         })
+        it("Shouldn't insert if there is nothing to insert", async () => {
+            // given
+
+            //@ts-ignore
+            mockDocumentClient.batchWrite = jest.fn(() => {
+                return {
+                    promise: () => {
+                        return new Promise((resolve, reject) => {
+                            //@ts-ignore ignore this because it will not perfectly match the object
+                            resolve()
+                        })
+                    }
+                }
+            })
+
+            // when
+            await sut.executeInsertions();
+
+            // then
+            expect(mockDocumentClient.batchWrite).toBeCalledTimes(0)  // this should not be called
+        })
     });
 });

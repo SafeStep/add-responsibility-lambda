@@ -110,6 +110,10 @@ export default class TableInteractor {
       }
       
       try {
+        if (Object.keys(this.insertionParams).length == 0) {
+          throw "Nothing to insert"
+        }
+
         const result = await this.docClient.batchWrite({
           RequestItems: this.insertionParams
         }).promise();
@@ -117,7 +121,7 @@ export default class TableInteractor {
       console.log("Completed insertions")
       }
       catch(e) {
-        console.log("Insertion failed")
+        console.log("Insertion not completed")
         console.error(e);
       }
       finally {
