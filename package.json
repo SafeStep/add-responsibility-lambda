@@ -2,7 +2,7 @@
     "name": "add-responsibility-lambda",
     "version": "1.0.0",
     "description": "Lambda for a green user to add a responsibility to their account",
-    "main": "index.js",
+    "main": "index.ts",
     "scripts": {
         "test-unit": "jest unit --coverage --runInBand --silent",
         "test-int": "jest int",
