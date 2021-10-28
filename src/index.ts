@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Container } from "typedi"
-import Injector from './injecter';
+import Injector from './injector';
 import { SQSEvent } from "aws-lambda";
 import Processor from "./processor";
 
