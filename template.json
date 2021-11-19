@@ -89,7 +89,7 @@
                 "Code": {
                     "S3Bucket":"safe-step-lambda-functions-source", 
                     "S3Key":"add-responsibility.zip",
-                    "S3ObjectVersion": "RB2wwM8uOMYZoQK2IMLgRY5GpZ8tAEYv"
+                    "S3ObjectVersion": "OVERWRITTEN"
                 },
                 "Environment": {
                     "Variables": {
