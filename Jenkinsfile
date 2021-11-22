@@ -23,7 +23,7 @@ pipeline {
                 sh "tsc -b"  // typescript transpile
                 
                 dir ("dist") {
-                    sh "npm install --production"  // install production libraries
+                    sh "npm install --only=prod"  // install production libraries
                 }
 
                 fileOperations([ fileZipOperation(folderPath: ZIP_FILE_NAME, outputFolderPath: "./")])  // zip the result
