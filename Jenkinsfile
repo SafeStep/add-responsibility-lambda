@@ -19,10 +19,12 @@ pipeline {
                 fileOperations([folderCreateOperation("dist")])
                 fileOperations([fileCopyOperation(excludes: "", flattenFiles: false, includes: "package.json", targetLocation: "dist")])
                 
-                sh "npm install --production"              
+                sh "npm install"              
                 sh "tsc -b"  // typescript transpile
                 
-                fileOperations([ fileDeleteOperation(includes: "dist/package.json", excludes: "")])
+                dir ("dist") {
+                    sh "npm install --production"  // install production libraries
+                }
 
                 fileOperations([ fileZipOperation(folderPath: ZIP_FILE_NAME, outputFolderPath: "./")])  // zip the result
 
@@ -45,7 +47,7 @@ pipeline {
                 echo "S3 Object Version: ${OBJECT_VERSION}";
 
                 script {
-                    jsonfile = readJSON file: CF_TEMPLATE_FILE_NAME
+                    jsonfile = readJSON(text: readFile(CF_TEMPLATE_FILE_NAME).trim())
                     jsonfile["Resources"]["AddResponsibilityLambda"]["Properties"]["Code"]["S3ObjectVersion"] = OBJECT_VERSION
                     writeJSON file: CF_TEMPLATE_FILE_NAME, json: jsonfile
                     echo "Injected S3 object version into template"
