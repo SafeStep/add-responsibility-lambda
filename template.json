@@ -62,6 +62,7 @@
             "Type":"AWS::SQS::Queue", 
             "Properties": {
                 "DelaySeconds": 0,
+                "ReceiveMessageWaitTimeSeconds": 1,
                 "QueueName": "add-responsibility-queue",
                 "RedrivePolicy": {
                     "deadLetterTargetArn": {"Fn::GetAtt":["AddResponsibilityQueueDLQ", "Arn"]},
